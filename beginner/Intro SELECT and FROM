@@ -1,0 +1,31 @@
+# Intro to SQL
+# SELECT and FROM statement using BigQuery public datasets
+
+# What are all the mascots in the table?
+
+
+SELECT
+  m.mascot
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS m
+
+
+# What are all the mascots and their universities?
+
+
+SELECT
+m.mascot, 
+m.market AS University
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS m
+
+
+  # What the home team, away, team, attendance, and seating capacity for all games in the mbb_games_sr table?
+
+  SELECT
+  mbb.h_name,
+  mbb.a_name,
+  mbb.attendance,
+  mbb.venue_capacity
+  FROM
+    `bigquery-public-data.ncaa_basketball.mbb_games_sr` as mbb
