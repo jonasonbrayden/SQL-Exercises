@@ -1,0 +1,46 @@
+# Who are the customer contacts from Illinois, Indiana, or Michigan, or that work for Fun4All?
+SELECT
+  cust.cust_name,
+  cust.cust_contact,
+  cust.cust_email,
+  cust.cust_state
+FROM
+  `brjo4089.styssql.customers` AS cust
+WHERE
+cust.cust_state IN('IL', 'IN', 'MI')
+
+UNION DISTINCT
+
+SELECT
+  cust.cust_name,
+  cust.cust_contact,
+  cust.cust_email,
+  cust.cust_state
+FROM
+  `brjo4089.styssql.customers` AS cust
+WHERE
+cust.cust_name = "Fun4All"
+;
+# Who are the customer contacts from Illinois, Indiana, or Michigan, or that work for Fun4All?
+#Include potential duplicates
+SELECT
+  cust.cust_name,
+  cust.cust_contact,
+  cust.cust_email,
+  cust.cust_state
+FROM
+  `brjo4089.styssql.customers` AS cust
+WHERE
+cust.cust_state IN('IL', 'IN', 'MI')
+
+UNION ALL
+
+SELECT
+  cust.cust_name,
+  cust.cust_contact,
+  cust.cust_email,
+  cust.cust_state
+FROM
+  `brjo4089.styssql.customers` AS cust
+WHERE
+cust.cust_name = "Fun4All"
