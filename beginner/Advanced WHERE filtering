@@ -1,0 +1,101 @@
+# Q1-Q7: SQL Advanced Data Filtering
+
+#Q1: What are all the products with a vendor id of DLL01 and a price of $4 or less?
+
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+    prod.vend_id = 'DLL01' AND prod.prod_price <=4
+;
+#Q2: What are all the products from the venfors with Ids of DLL01 or BRS01?
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+    prod.vend_id = 'DLL01' OR prod.vend_id = 'BRS01'
+;
+#Q2b. same question but different approach
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+    prod.vend_id IN ('DLL01','BRS01') -- This is the same as doing the OR statement on line 24
+;
+#Q3: What are all the products we source from the vendors wth ids of DLL01 and BRS01 that have prices above $10?
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE 
+    prod.vend_id ='DLL01'OR prod.vend_id ='BRS01' AND prod.prod_price > 10
+;
+#Answering Question 3 the correct way
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE 
+    (prod.vend_id ='DLL01'OR prod.vend_id ='BRS01') AND prod.prod_price > 10
+;
+#Q4:What are the products from vendors excluding those with the id of DLL01?
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE 
+    NOT prod.vend_id = 'DLL01'
+;
+#Q5: WHat are all our producys that start with "Fish"?
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE 
+    prod.prod_name LIKE 'Fish%'
+;
+#Q6: What are all our products with 'bean bag'?
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE 
+    prod.prod_name LIKE '%bean bag%'
+;
+#Q7:What are all of our teddy bear products that have one or two character inch dimension to start the name?
+ SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE 
+    prod.prod_name LIKE '_ inch%' OR prod.prod_name LIKE '__ inch%' #_ and % is a wildcard (you have to use 'LIKE'), which is a placeholder for potential values that could follow or precede what you are looking for.
