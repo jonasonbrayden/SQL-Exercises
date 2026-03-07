@@ -1,0 +1,169 @@
+# Q1:What are thecustomers who ordered a particular item?
+SELECT
+ordi.order_num
+FROM
+  `brjo4089.styssql.order_items` AS ordi
+WHERE
+ordi.prod_id='RGAN01'
+;
+#Use answer above to filted what customers places these order
+SELECT
+ord.cust_id
+FROM
+  `brjo4089.styssql.orders` AS ord
+WHERE
+  ord.order_num IN(20008, 20007)
+  ;
+# ANSWER Q1 WITH A SUBQUERY
+SELECT
+ord.cust_id
+FROM
+  `brjo4089.styssql.orders` AS ord
+WHERE
+ord.order_num IN
+
+(SELECT
+ordi.order_num
+FROM
+`brjo4089.styssql.order_items` AS ordi
+WHERE
+ordi.prod_id='RGAN01'
+)
+;
+#Q2:What are the customer names of those who ordered the product, 'RGAN01'?
+SELECT
+  cust.cust_name AS name,
+  cust.cust_id
+  FROM
+  `brjo4089.styssql.customers` AS cust
+  WHERE
+    cust.cust_id IN
+    (SELECT ord.cust_id
+    FROM `brjo4089.styssql.orders` AS ord
+    WHERE ord.order_num
+    IN
+      (SELECT ordi.order_num
+      FROM `brjo4089.styssql.order_items` AS ordi
+      WHERE ordi.prod_id= 'RGAN01'
+      )
+
+  )
+  ;
+  #Subquery in the SELECT clause
+  #Q3: What was the total order quantity for each order as well as overall total quantity and average across all orders?
+  SELECT
+    ordi.order_num,
+    SUM(ordi.quantity) AS order_qty,
+    (SELECT SUM(quantity)FROM `brjo4089.styssql.order_items`) AS total_qty,
+    (SELECT ROUND(SUM(quantity)/ COUNT(DISTINCT order_num),2)
+    FROM `brjo4089.styssql.order_items`
+    ) AS avg_order_qty
+  FROM
+    `brjo4089.styssql.order_items` AS ordi
+  GROUP BY
+  ordi.order_num
+  ;
+  #subquery in the HAVING clause
+  #Q4: What are the products with a total quantity sold greater than the average product qunatity sold?
+  SELECT
+  ordi.prod_id,
+  SUM(ordi.quantity) AS product_qty,
+  (SELECT COUNT(DISTINCT prod_id) FROM `brjo4089.styssql.order_items`) AS total_prods,
+  (SELECT SUM(quantity)FROM `brjo4089.styssql.order_items` ) AS total_qty,
+
+  (SELECT ROUND(SUM(quantity)/COUNT(DISTINCT prod_id), 2) FROM `brjo4089.styssql.order_items` ) AS avg_prod_qty
+
+  FROM
+    `brjo4089.styssql.order_items` AS ordi
+    GROUP BY 
+    ordi.prod_id
+  HAVING
+    product_qty > avg_prod_qty
+;
+#What are all the customer numbers that ordered the product 'BR01'?
+SELECT
+  cust.cust_id AS customernum
+  FROM
+  `brjo4089.styssql.customers` AS cust
+  WHERE
+    cust.cust_id IN
+    (SELECT ord.cust_id
+    FROM `brjo4089.styssql.orders` AS ord
+    WHERE ord.order_num
+    IN
+      (SELECT ordi.order_num
+      FROM `brjo4089.styssql.order_items` AS ordi
+      WHERE ordi.prod_id= 'BR01'
+      )
+    )
+  ;
+    #What is the total population in each of the Boulder zipcodes 80301, 80302, 80303, 80304, and 80310 and the total population for all those zipcodes combined
+SELECT
+pop.zipcode,
+pop.population AS zipPop,
+(SELECT SUM(pop.population)
+FROM `bigquery-public-data.census_bureau_usa.population_by_zip_2010`AS pop
+WHERE
+pop.gender IS NULL
+AND
+pop.zipcode IN("80301", "80302", "80303", "80304", "80310")
+) AS totPop
+FROM
+  `bigquery-public-data.census_bureau_usa.population_by_zip_2010` AS pop
+WHERE
+pop.zipcode IN("80301", "80302", "80303", "80304", "80310")
+AND
+pop.gender IS NULL
+GROUP BY
+pop.population,
+pop.zipcode
+;
+#Q2: Which months had an average monthly air temperature greater than the overall average air temperature?
+--Show the months, monthly average, and overall average in the same result set/output
+--Round the results to 1 decimal place
+--Alias the monthly average air temperature as moAvgTemp
+--Alias the overall average air temperature as ovAvgTemp
+--Sort the results in descending order by monthly average air temperature
+SELECT
+icoad.month,
+ROUND((AVG(icoad.air_temperature)),2) AS moAvgTemp,
+(SELECT 
+ROUND(AVG(icoad_sub.air_temperature)) AS ovAvgTemp
+FROM
+`bigquery-public-data.noaa_icoads.icoads_core_2017` AS icoad_sub
+) AS overall_avg_air_temp
+FROM
+  `bigquery-public-data.noaa_icoads.icoads_core_2017` AS icoad
+GROUP BY
+icoad.month
+HAVING
+moAvgTemp> overall_avg_air_temp
+ORDER BY
+moAvgTemp DESC
+;
+#Q3: (Reference Question1)  What is each of Boulder's zip codes proportion of the total?
+SELECT
+pop.zipcode,
+pop.population AS zipPop,
+  (SELECT SUM(pop.population)
+  FROM `bigquery-public-data.census_bureau_usa.population_by_zip_2010`AS pop
+  WHERE
+  pop.gender IS NULL
+  AND
+  pop.zipcode IN("80301", "80302", "80303", "80304", "80310")
+  ) AS totPop,
+pop.population/
+    (SELECT(SUM(pop.population)) 
+    FROM 
+    `bigquery-public-data.census_bureau_usa.population_by_zip_2010`AS pop
+    WHERE pop.gender IS NULL
+    AND pop.zipcode IN("80301", "80302", "80303", "80304", "80310") ) AS ratio
+FROM
+  `bigquery-public-data.census_bureau_usa.population_by_zip_2010` AS pop
+WHERE
+  pop.zipcode IN("80301", "80302", "80303", "80304", "80310")
+AND
+pop.gender IS NULL
+GROUP BY
+pop.population,
+pop.zipcode
