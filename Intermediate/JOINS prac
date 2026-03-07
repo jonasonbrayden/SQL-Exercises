@@ -1,0 +1,120 @@
+#Look at ERD
+#What are the customers ids, names, addresses, city, order numbers, an order dates of all customers?
+SELECT
+cust.cust_id,
+cust.cust_name,
+cust.cust_address,
+cust.cust_city,
+ord.order_num,
+ord.order_date
+FROM
+  `brjo4089.styssql.customers` AS cust,
+   `brjo4089.styssql.orders` AS ord
+WHERE
+  cust.cust_id= ord.cust_id
+;
+# Same question but using INNER JOIN in the FROM (more common)
+SELECT
+cust.cust_id,
+cust.cust_name,
+cust.cust_address,
+cust.cust_city,
+ord.order_num,
+ord.order_date
+FROM
+  `brjo4089.styssql.customers` AS cust
+  INNER JOIN
+   `brjo4089.styssql.orders` AS ord
+   ON
+   cust.cust_id= ord.cust_id
+
+;
+#What are the order numbers, order items, product ids, and quantity for all customers?
+SELECT
+cust.cust_id,
+cust.cust_name,
+ord.order_num,
+ordi.order_item,
+ordi.prod_id,
+ordi.quantity
+FROM
+  `brjo4089.styssql.customers` AS cust
+  INNER JOIN
+   `brjo4089.styssql.orders` AS ord
+   ON
+   cust.cust_id= ord.cust_id
+  INNER JOIN
+  `brjo4089.styssql.order_items` AS ordi
+  ON
+  ord.order_num = ordi.order_num
+;
+# What are all the orders in our database?
+SELECT
+cust.cust_name,
+ord.order_num,
+ordi.order_item,
+prod.prod_id,
+prod.prod_name,
+vend.vend_name
+
+FROM
+  `brjo4089.styssql.customers` AS cust
+  INNER JOIN
+   `brjo4089.styssql.orders` AS ord
+   ON
+   cust.cust_id= ord.cust_id
+  INNER JOIN
+  `brjo4089.styssql.order_items` AS ordi
+  ON
+  ord.order_num = ordi.order_num
+  INNER JOIN
+  `brjo4089.styssql.products` AS prod
+  ON
+  prod.prod_id = ordi.prod_id
+  INNER JOIN
+  `brjo4089.styssql.vendors` AS vend
+  ON
+  vend.vend_id= prod.vend_id
+  ORDER BY
+  cust.cust_name,
+  prod.prod_name
+  ;
+  #What was the total order quantity for each vendor?
+SELECT
+vend.vend_id,
+vend.vend_name,
+SUM(ordi.quantity) AS vend_qty
+FROM
+  `brjo4089.styssql.order_items` AS ordi
+  INNER JOIN
+  `brjo4089.styssql.products` AS prod
+  ON
+  prod.prod_id = ordi.prod_id
+  INNER JOIN
+  `brjo4089.styssql.vendors` AS vend
+  ON
+  vend.vend_id= prod.vend_id
+GROUP BY
+vend.vend_id,
+vend.vend_name
+ORDER BY
+vend_qty DESC
+
+;
+#What was the total order quantity for each product?
+SELECT
+prod.prod_id,
+prod.prod_name,
+SUM(ordi.quantity) AS prod_qty
+FROM
+  `brjo4089.styssql.order_items` AS ordi
+  INNER JOIN
+  `brjo4089.styssql.products` AS prod
+  ON
+  prod.prod_id = ordi.prod_id
+GROUP BY
+prod.prod_name,
+prod.prod_id
+ORDER BY
+prod_qty DESC,
+prod.prod_name
