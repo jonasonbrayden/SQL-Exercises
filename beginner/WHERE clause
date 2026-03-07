@@ -1,0 +1,56 @@
+# Filtering rows of data with the WHERE clause
+
+# Q1 What are all the products and their prices
+# styssql.products
+
+SELECT
+  prod.prod_name,
+  prod.prod_price
+FROM
+  `brjo4089.styssql.products` AS prod
+;
+
+#Q2: What are all the products with prices greater than $5?
+
+SELECT
+prod.prod_name,
+prod.prod_price
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+prod.prod_price > 5
+;
+#Q3: What are all the products with vendor ids where the the vendor ID is not "DLL01"?
+
+SELECT
+  prod.prod_name,
+  prod.vend_id 
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+  prod.vend_id <> 'DLL01'
+;
+
+# Q4: What are all the prodcuts between $5 and $10?
+
+SELECT
+ prod.prod_name,
+ prod.vend_id,
+ prod.prod_price
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+  prod.prod_price BETWEEN 5 AND 10
+;
+
+# Q5: Are there any products that do not have a price entered in the products table?
+# if so, list the products names and vender id
+
+SELECT
+prod.prod_name,
+ prod.vend_id,
+ prod.prod_price
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+  prod.prod_price IS NULL
