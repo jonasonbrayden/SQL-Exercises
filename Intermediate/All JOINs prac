@@ -1,0 +1,145 @@
+#Left Outer Join
+# How many orders has each customer placed?
+SELECT
+cust.cust_id,
+cust.cust_name,
+COUNT(ord.order_num) AS cust_orders
+FROM
+  `brjo4089.styssql.customers` AS cust
+  LEFT JOIN
+  `brjo4089.styssql.orders` AS ord
+  ON
+  cust.cust_id = ord.cust_id
+GROUP BY
+cust.cust_id,
+cust.cust_name
+;
+#How many orders have been placed for each of our products?
+SELECT
+prod.prod_id,
+prod.prod_name,
+COUNT (DISTINCT ordi.order_num) AS prod_orders
+FROM
+`brjo4089.styssql.products` AS prod
+LEFT JOIN
+`brjo4089.styssql.order_items` AS ordi
+ON
+prod.prod_id = ordi.prod_id
+GROUP BY 
+prod.prod_id,
+prod.prod_name
+#Find orders that do now have an order yet
+HAVING
+prod_orders=0
+;
+#Self Join
+#What are all the customer names and emails for every company contact that works at the same company as Jim Jones?
+SELECT
+cust1.cust_id,
+cust1.cust_name,
+cust1.cust_contact AS contact_1,
+cust1.cust_email,
+cust2.cust_contact AS contact_2
+FROM
+  `brjo4089.styssql.customers` AS cust1
+  LEFT JOIN
+  `brjo4089.styssql.customers` AS cust2
+  ON
+  cust1.cust_name= cust2.cust_name
+WHERE
+cust2.cust_contact = "Jim Jones"
+;
+#INNER JOIN REVIEW
+#What was the total order quantity for each vendor?
+# Additionally, show the total number of vendors as, num_vendors, and the average order quantity per vendor
+SELECT
+vend.vend_id,
+vend.vend_name,
+SUM(ordi.quantity) AS vendor_qty,
+(SELECT 
+COUNT(vend.vend_id) AS tot_vends
+FROM
+`brjo4089.styssql.vendors` AS vend),
+
+ROUND((SELECT SUM(quantity) FROM `brjo4089.styssql.order_items`)
+/
+(SELECT COUNT(vend_id) FROM `brjo4089.styssql.vendors`), 2) AS avg_qty_per_vend
+
+FROM
+  `brjo4089.styssql.order_items` AS ordi
+  INNER JOIN
+  `brjo4089.styssql.products` AS prod
+  ON
+  ordi.prod_id = prod.prod_id
+  INNER JOIN
+  `brjo4089.styssql.vendors` AS vend
+  ON
+  prod.vend_id = vend.vend_id
+GROUP BY
+vend.vend_id,
+vend.vend_name
+ORDER BY
+vendor_qty DESC
+;
+#  What are all the vendors with or without an order associated with their products?
+SELECT
+vend.vend_id,
+vend.vend_name,
+prod.prod_id,
+prod.prod_name,
+SUM(ordi.quantity) AS totOrd
+FROM
+`brjo4089.styssql.vendors` AS vend
+LEFT JOIN
+`brjo4089.styssql.products` AS prod
+ON
+vend.vend_id = prod.vend_id
+LEFT JOIN
+`brjo4089.styssql.order_items` AS ordi
+ON prod.prod_id= ordi.prod_id
+GROUP BY
+vend.vend_id,
+vend.vend_name,
+prod.prod_id,
+prod.prod_name
+ORDER BY
+vend.vend_name,
+totOrd DESC
+;
+# What vendors are missing product information? 
+SELECT
+vend.vend_id,
+vend.vend_name,
+prod.prod_id,
+prod.prod_name,
+FROM
+`brjo4089.styssql.vendors` AS vend
+LEFT JOIN
+`brjo4089.styssql.products` AS prod
+ON
+vend.vend_id = prod.vend_id
+WHERE
+prod.prod_id IS NULL
+ORDER BY
+prod.prod_id
+;
+#Who are all our vendors that have product information but don’t have an order for certain products yet?  
+SELECT
+vend.vend_id,
+vend.vend_name,
+prod.prod_id,
+prod.prod_name
+FROM
+  `brjo4089.styssql.vendors` AS vend
+  INNER JOIN
+  `brjo4089.styssql.products` AS prod
+  ON
+  vend.vend_id =prod.vend_id
+  LEFT JOIN
+  `brjo4089.styssql.order_items` AS ordi
+  ON prod.prod_id= ordi.prod_id
+WHERE
+ordi.order_num IS NULL
+ORDER BY
+vend.vend_name,
+prod.prod_name
