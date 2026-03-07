@@ -1,0 +1,53 @@
+#What are the vendors names and countries?
+# Combing fields using concat
+SELECT
+vend.vend_name,
+vend.vend_country,
+CONCAT(vend.vend_name, '', '(', vend.vend_country, ')') AS vendCountry
+FROM
+  `brjo4089.styssql.vendors` AS vend
+;
+#What are the first four letters in each vendors name?
+SELECT
+vend.vend_name,
+LEFT(vend.vend_name, 4) AS vend_first4
+FROM
+  `brjo4089.styssql.vendors` AS vend
+;
+#What is the expanded/total price for all products for our ordered items?
+SELECT
+ordI.order_num,
+ordI.prod_id,
+ordI.quantity,
+ordI.item_price,
+ordI.quantity* ordI.item_price AS total_price
+FROM
+  `brjo4089.styssql.order_items` AS ordI
+ORDER BY
+total_price DESC
+;
+#What are all the orders that took place in 2012?
+SELECT
+o.order_num,
+o.order_date,
+EXTRACT(YEAR FROM o.order_date) AS year
+FROM
+  `brjo4089.styssql.orders` AS o
+WHERE
+EXTRACT(YEAR FROM o.order_date)= 2012
+;
+#What is the average price of our products?
+SELECT
+CONCAT('$', ROUND(AVG(prod.prod_price),2)) AS avgPrice
+FROM
+  `brjo4089.styssql.products` AS prod
+;
+#What is our minimum , average, and maximum prices for all products?
+SELECT
+  COUNT(*) AS totRows,
+  COUNT(prod.prod_id) AS totProds,
+  ROUND(MIN(prod.prod_price),2) AS minPrice,
+  ROUND(AVG(prod.prod_price), 2) AS avgPrice,
+  ROUND(MAX(prod.prod_price),2) AS maxPrice
+FROM
+  `brjo4089.styssql.products` AS prod
