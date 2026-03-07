@@ -1,0 +1,46 @@
+SELECT
+  RIGHT (CAST(c.cust_id AS STRING), 4),
+  LEFT (c.cust_name, 4)
+FROM
+  `brjo4089.styssql.customers` AS c
+;
+#Q1: What are the longest names that end with "en"? 
+SELECT DISTINCT
+    long.name, 
+      LENGTH(long.name) AS char_count
+
+FROM
+    `bigquery-public-data.usa_names.usa_1910_current` AS long
+WHERE
+  long.name LIKE '%en'
+ORDER BY
+  char_count DESC
+;
+#Q2: Task: Create a new field, name_st_year_count, by combining fields in the dataset given.
+SELECT 
+CONCAT(long.name,'-', long.state,'-' ,long.year,'-', long.number) AS name_st_year_count
+
+FROM
+    `bigquery-public-data.usa_names.usa_1910_current` AS long
+WHERE
+long.state = 'CO' 
+ORDER BY 
+name_st_year_count
+;
+# Q3: What is the average sea level pressure rounded to 2 decimal places?
+#Show the total (sum) of pressure value in the results in millions
+--Show the record count in millions
+--Show the record count in abbreviated format (e.g., 1.25M)
+--Don't count NULL records for sea_level_pressure
+--Calculate the average sea level pressure two different ways
+--By using the built-in AVG() function
+--By dividing the total pressure values by the count of non-null records--
+
+SELECT
+ROUND(SUM(p.sea_level_pressure)/1000000, 2) AS tot_pressure_H,
+CONCAT(ROUND(COUNT(sea_level_pressure)/1000000, 2), 'H') AS record_count_H,
+ROUND(AVG(sea_level_pressure), 2) AS avg_pressure_1,
+ROUND(SUM(sea_level_pressure)/ COUNT(sea_level_pressure), 2) AS avg_pressure_2
+
+FROM
+ `bigquery-public-data.noaa_icoads.icoads_core_2017` AS p
