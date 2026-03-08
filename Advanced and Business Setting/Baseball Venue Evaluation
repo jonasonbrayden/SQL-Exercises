@@ -1,0 +1,16 @@
+SELECT
+   CASE WHEN venueName IN('Rogers Centre', 'Coors Field', 'Fenway Park', 'Great   American Ball Park', 'Angel Stadium of Anaheim') THEN 'Top5HitPark'
+  ELSE 'Other' END AS parkType,
+  SUM(homeFinalHits) + SUM(awayFinalHits) AS hits,
+  SUM(homeFinalRuns) + SUM(awayFinalRuns) AS runs,
+  ROUND((SUM(homeFinalRuns) + SUM(awayFinalRuns))/ (SUM(homeFinalHits) + SUM          (awayFinalHits)),2) AS ratio,
+  venueName
+FROM
+  `bigquery-public-data.baseball.games_wide`
+GROUP BY
+  ROLLUP
+    (parkType,
+    venueName 
+    )
+ORDER BY
+  hits DESC
