@@ -42,3 +42,44 @@ round(SUM(ordI.quantity)/(COUNT(DISTINCT order_num)),2)
 FROM
 `styssql.order_items` as ordI
 ) as avgQty
+;
+# Q5:What products have inventory (P_QOH) but haven't been sold? 
+SELECT
+  prod.P_CODE,
+  prod.P_QOH,
+  vend.V_NAME
+FROM
+  `brjo4089.SaleCo.vendor` AS vend
+INNER JOIN
+  `brjo4089.SaleCo.product` AS prod
+ON 
+  vend.V_CODE = prod.V_CODE
+
+WHERE
+  vend.V_ORDER IS false
+ORDER BY
+  prod.P_QOH,
+  prod.P_CODE DESC
+
+;
+#Q6:What products have inventory (P_QOH) but haven't been sold? 
+SELECT
+  prod.P_CODE,
+  prod.P_QOH,
+  vend.V_NAME,
+  lin.INV_NUMBER
+FROM
+  `brjo4089.SaleCo.vendor` AS vend
+LEFT JOIN
+  `brjo4089.SaleCo.product` AS prod
+ON 
+  vend.V_CODE = prod.V_CODE
+LEFT JOIN
+  `brjo4089.SaleCo.line` AS lin
+ON
+  prod.P_CODE = lin.p_code
+WHERE
+  INV_NUMBER IS NULL
+ORDER BY
+  prod.P_QOH,
+  prod.P_CODE DESC
