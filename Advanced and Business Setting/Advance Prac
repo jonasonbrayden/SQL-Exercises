@@ -1,0 +1,237 @@
+# Q6:Which users listened to both "Dolly Parton" more than 50 times and "Madonna" more than 50 times? 
+SELECT
+user_name,
+AVG(d_listens),
+COUNT(list.listened_at)
+FROM
+  `brjo4089.listenbrainz.listen` AS list
+  INNER JOIN
+  (
+  SELECT
+  artist_name,
+  user_name,
+  COUNT(listened_at) AS d_listens
+  FROM
+  `brjo4089.listenbrainz.listen` 
+  WHERE
+  artist_name = "Dolly Parton"
+  GROUP BY
+  artist_name,
+  user_name
+  HAVING 
+  d_listens > 50
+  ORDER BY
+  d_listens DESC
+) AS view1
+;
+#Q4 and Q5 Write a decision support query that follows the specifications below. The following questions will ask you to input data based on this query.
+SELECT
+   CASE WHEN venueName IN('Rogers Centre', 'Coors Field', 'Fenway Park', 'Great   American Ball Park', 'Angel Stadium of Anaheim') THEN 'Top5HitPark'
+  ELSE 'Other' END AS parkType,
+  SUM(homeFinalHits) + SUM(awayFinalHits) AS hits,
+  SUM(homeFinalRuns) + SUM(awayFinalRuns) AS runs,
+  ROUND((SUM(homeFinalRuns) + SUM(awayFinalRuns))/ (SUM(homeFinalHits) + SUM          (awayFinalHits)),2) AS ratio,
+  venueName
+FROM
+  `bigquery-public-data.baseball.games_wide`
+GROUP BY
+  ROLLUP
+    (parkType,
+    venueName 
+    )
+ORDER BY
+  hits DESC
+;
+
+
+WHERE 
+  artist_name = "Madonna"
+GROUP BY
+  user_name
+HAVING
+  m_listens > 50
+;
+SELECT user_id
+FROM user_songs
+WHERE artist = 'Dolly Parton' AND listens > 50
+AND user_id IN (
+    SELECT user_id
+    FROM user_songs
+    WHERE artist = 'Madonna' AND listens > 50
+;
+#Q7: In 2015, what boros had at least 600 "hawthorn" trees and at least 1000 "honeylocust" trees? 
+SELECT DISTINCT
+  tree.borocode,
+  tree.boroname, 
+  hawtree.haw_trees,
+  loctree.loc_trees,
+FROM
+(SELECT
+  boroname,
+  COUNT(tree_id) AS loc_trees
+  FROM`bigquery-public-data.new_york_trees.tree_census_2015` 
+  WHERE
+  spc_common = "honeylocust" AND EXTRACT(YEAR FROM created_at) = 2015
+  GROUP BY
+  boroname
+  HAVING
+  loc_trees >=1000) AS loctree
+INNER JOIN
+  (SELECT
+  boroname,
+  COUNT(tree_id) AS haw_trees
+  FROM`bigquery-public-data.new_york_trees.tree_census_2015` 
+  WHERE
+  spc_common = "hawthorn" AND EXTRACT(YEAR FROM created_at) = 2015
+  GROUP BY
+  boroname
+  HAVING
+  haw_trees >=600) AS hawtree
+ON
+  loctree.boroname =hawtree.boroname
+INNER JOIN
+  `bigquery-public-data.new_york_trees.tree_census_2015` AS tree
+ON 
+  tree.boroname = hawtree.boroname
+ORDER BY
+  boroname DESC
+;
+SELECT
+  tree.boroname,
+  COUNT(tree.tree_id) AS haw_trees
+FROM
+  `bigquery-public-data.new_york_trees.tree_census_2015` AS tree
+WHERE
+  spc_common = "hawthorn" AND EXTRACT(YEAR FROM created_at) = 2015
+GROUP BY
+  tree.boroname
+HAVING
+  haw_trees >=600
+;
+SELECT
+  tree.boroname,
+  COUNT(tree.tree_id) AS loc_trees
+FROM
+  `bigquery-public-data.new_york_trees.tree_census_2015` AS tree
+WHERE
+  spc_common = "honeylocust" AND EXTRACT(YEAR FROM created_at) = 2015
+GROUP BY
+  tree.boroname
+HAVING
+  loc_trees >=1000
+;
+ #What were Mariah Carey's total listens as well as average listens per user? 
+ SELECT
+list.artist_name,
+list.user_name,
+COUNT(list.listened_at) AS user_listens,
+COUNT (DISTINCT user_name) AS total_users,
+COUNT(list.listened_at)/COUNT(DISTINCT user_name)avglistensperuser,
+(SELECT
+COUNT(list.listened_at) 
+FROM
+  `brjo4089.listenbrainz.listen` AS list
+WHERE 
+artist_name = "Mariah Carey") AS total_listens ,
+(SELECT
+COUNT(list.listened_at)/COUNT (DISTINCT user_name)
+
+FROM`brjo4089.listenbrainz.listen` AS list
+) AS avg_user_listens
+
+FROM
+  `brjo4089.listenbrainz.listen` AS list
+
+WHERE
+artist_name = "Mariah Carey"
+GROUP BY
+list.artist_name,
+list.user_name
+ORDER BY
+user_listens DESC
+;
+#Q4: As of 4/1/2022, what are the total and average cases, deaths, and population for Colorado and California? 
+SELECT
+  state  AS ST,
+  county_name AS county,
+  SUM(CASE WHEN date = '2022-4-01' THEN confirmed_cases END) AS totCases,
+  SUM(CASE WHEN date = '2022-4-01' THEN deaths END) AS totDeaths,
+  SUM(CASE WHEN date = '2022-4-01' THEN population END) AS totPop,
+  AVG(CASE WHEN date = '2022-4-01' THEN confirmed_cases END) AS avgCases,
+  AVG(CASE WHEN date = '2022-4-01' THEN deaths END) AS avgDeaths,
+  AVG(CASE WHEN date = '2022-4-01' THEN population END) AS avgPop
+FROM
+  `brjo4089.mydb.dw_covid19`
+WHERE
+state = "CO" OR state= "CA"
+GROUP BY
+ROLLUP(state,
+county_name)
+ORDER BY
+totCases DESC
+;
+#Q5: As of 2/1/2022, what were the total cases for each time zone? 
+SELECT
+  timeZone,
+  SUM(CASE WHEN date = '2022-2-01' THEN confirmed_cases END) AS totCases,
+  SUM(CASE WHEN date = '2022-2-01' THEN deaths END) AS totDeaths,
+  SUM(CASE WHEN date = '2022-2-01' THEN population END) AS totPop,
+ (SELECT SUM(CASE WHEN date = '2022-4-01' THEN confirmed_cases END)/SUM    (CASE WHEN date = '2022-4-01' THEN population END) *100000
+  FROM `brjo4089.mydb.dw_covid19`) AS casesper100k,
+  (SELECT SUM(CASE WHEN date = '2022-4-01' THEN deaths END)/SUM(CASE WHEN   date = '2022-4-01' THEN population END) *100000
+  FROM `brjo4089.mydb.dw_covid19`) AS deathsper100k
+
+FROM
+  `brjo4089.mydb.dw_covid19`
+  GROUP BY
+ timeZone
+ ORDER BY
+ casesper100k DESC
+;
+#Q1:What is the total customer revenue per invoice?
+SELECT
+  IFNULL(cus.CUS_LNAME,'Grand Total') AS name,
+  IFNULL(CAST(inv.INV_NUMBER AS STRING), 'Cust Total') AS invoice, 
+  ROUND(SUM(cus.CUS_BALANCE),2) AS revenue
+
+FROM
+  `brjo4089.SaleCo.customer` AS cus
+INNER JOIN
+  `brjo4089.SaleCo.invoice` AS inv
+ON
+  cus.CUS_CODE = inv.CUS_CODE
+GROUP BY
+  ROLLUP(
+    cus.CUS_LNAME,
+    inv.INV_NUMBER
+  )
+ORDER BY
+  revenue DESC,
+  name
+;
+#Q3: What were the assignment charges for each project as well as the running total assignment charges?
+SELECT
+  proj.proj_num,
+  proj.proj_name,
+  assign.assign_num,
+  SUM(assign.ASSIGN_CHARGE) OVER(
+    PARTITiON BY proj.PROJ_NUM
+    ORDER BY assign.ASSIGN_NUM
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+   ) AS assign_chg_running_total,
+  ROUND(SUM(assign.ASSIGN_CHARGE),2) AS ASSIGN_CHARGE
+  
+FROM
+  `brjo4089.ConstrucCO.project` AS proj
+INNER JOIN
+  `brjo4089.ConstrucCO.assignment` AS assign
+ON
+  proj.proj_num = assign.proj_num
+GROUP BY
+  proj.proj_num,
+  proj.proj_name,
+  assign.assign_num,
+  assign.ASSIGN_CHARGE
+ORDER BY
+  proj.PROJ_NUM,
+  assign.ASSIGN_NUM 
