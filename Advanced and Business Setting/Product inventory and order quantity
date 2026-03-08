@@ -1,0 +1,44 @@
+#What are all the products with inventory levels below the average inventory levels?
+
+SELECT prod.p_code, prod.p_descript,
+vend.v_code, vend.v_name, vend.v_contact,
+prod.p_qoh,
+
+(SELECT round(avg(prod.p_qoh),2) from `brjo4089.SaleCo.product` as prod) as avgProdInventory,
+
+round(prod.p_qoh - (SELECT avg(p_qoh) from `brjo4089.SaleCo.product` as prod),2) as invAvgDiff
+
+FROM `brjo4089.SaleCo.product` as prod
+LEFT JOIN
+`brjo4089.SaleCo.vendor` as vend
+ON
+prod.v_code = vend.v_code
+
+GROUP BY
+prod.p_code, prod.p_descript, prod.p_qoh,
+vend.v_code, vend.v_name, vend.v_contact
+
+HAVING
+invAvgDiff < 0
+
+ORDER BY
+invAvgDiff
+;
+#What is the total order quantity for all orders compared to the overall company total quantity and overall company average quantity? 
+
+SELECT
+ordI.order_num, sum(ordI.quantity) as ordTotal,
+
+#subquery one to get total quantity for all orders
+(SELECT
+sum(ordI.quantity)
+FROM
+`styssql.order_items` as ordI
+) as totQty,
+
+#subquery two to get average quantity for all orders
+(SELECT
+round(SUM(ordI.quantity)/(COUNT(DISTINCT order_num)),2)
+FROM
+`styssql.order_items` as ordI
+) as avgQty
