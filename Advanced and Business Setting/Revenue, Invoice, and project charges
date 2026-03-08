@@ -1,0 +1,65 @@
+#Q1:What is the total customer revenue per invoice?
+SELECT
+  IFNULL(cus.CUS_LNAME,'Grand Total') AS name,
+  IFNULL(CAST(inv.INV_NUMBER AS STRING), 'Cust Total') AS invoice, 
+  ROUND(SUM(cus.CUS_BALANCE),2) AS revenue
+
+FROM
+  `brjo4089.SaleCo.customer` AS cus
+INNER JOIN
+  `brjo4089.SaleCo.invoice` AS inv
+ON
+  cus.CUS_CODE = inv.CUS_CODE
+GROUP BY
+  ROLLUP(
+    cus.CUS_LNAME,
+    inv.INV_NUMBER
+  )
+ORDER BY
+  revenue DESC,
+  name
+;
+# Q2:How many invoices does each customer have? 
+SELECT
+  cus.CUS_LNAME,
+  cus.CUS_CODE,
+  COUNT(inv.INV_NUMBER) AS invoice 
+
+FROM
+  `brjo4089.SaleCo.customer` AS cus
+LEFT JOIN
+  `brjo4089.SaleCo.invoice` AS inv
+ON
+  cus.CUS_CODE = inv.CUS_CODE
+GROUP BY
+  cus.CUS_LNAME,
+  cus.CUS_CODE
+ORDER BY
+  cus.CUS_LNAME
+;
+#Q3: What were the assignment charges for each project as well as the running total assignment charges?
+SELECT
+  proj.proj_num,
+  proj.proj_name,
+  assign.assign_num,
+  SUM(assign.ASSIGN_CHARGE) OVER(
+    PARTITiON BY proj.PROJ_NUM
+    ORDER BY assign.ASSIGN_NUM
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+   ) AS assign_chg_running_total,
+  ROUND(SUM(assign.ASSIGN_CHARGE),2) AS ASSIGN_CHARGE
+  
+FROM
+  `brjo4089.ConstrucCO.project` AS proj
+INNER JOIN
+  `brjo4089.ConstrucCO.assignment` AS assign
+ON
+  proj.proj_num = assign.proj_num
+GROUP BY
+  proj.proj_num,
+  proj.proj_name,
+  assign.assign_num,
+  assign.ASSIGN_CHARGE
+ORDER BY
+  proj.PROJ_NUM,
+  assign.ASSIGN_NUM 
