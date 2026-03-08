@@ -1,0 +1,182 @@
+CREATE SCHEMA
+  brjo4089.quiz5
+OPTIONS(
+  location = "us",
+  description = "This is my dataset for quiz5",
+  is_case_insensitive = TRUE
+)
+;
+CREATE TABLE
+`brjo4089.quiz5.emp`
+(
+  emp_num INT64,
+  emp_lname STRING,
+  emp_fname STRING,
+  emp_initial STRING,
+  emp_hiredate DATE,
+  job_code INT64
+
+)
+;
+# Using the SaleCo database, create a view, vProduct, that does the following for each vendor
+CREATE VIEW
+  `brjo4089.SaleCo.vProduct`
+AS
+SELECT
+
+  CASE WHEN CAST(vend.V_CODE AS STRING) IS NULL THEN 'In-House'ELSE CAST(vend.   V_CODE AS STRING) END AS vcode,
+  CASE WHEN V_NAME IS NULL THEN 'In-House'ELSE V_NAME END AS vname,
+  V_CONTACT,
+  COUNT(DISTINCT P_CODE) AS vendProds,
+  P_PRICE*P_QOH AS vendValue,
+  MAX(P_QOH) AS maxQty,
+  MIN(P_QOH) AS minQty,
+  ROUND(AVG(P_QOH),2) AS avgQty
+
+FROM
+  `brjo4089.SaleCo.vendor` AS vend
+INNER JOIN
+  `brjo4089.SaleCo.product` AS prod
+ON
+vend.v_code = prod.v_code
+
+GROUP BY
+ROLLUP (vend.v_code,V_NAME,
+vend.V_CODE,
+V_NAME,
+P_PRICE,
+P_QOH,
+V_CONTACT)
+;
+SELECT
+*
+FROM
+  `brjo4089.SaleCo.vProduct`
+ORDER BY
+vendValue DESC
+;
+#Q:What are the total products and total value for each vendor as well as the grand totals for each of these metrics?
+SELECT
+vname,
+
+FROM
+`brjo4089.SaleCo.vProduct`
+;
+#Q1: Create the subset Classic Rock table from listenbrainz dataset. 
+#For now, restrict the artist names being stored in this table to the following string literals :  'Led Zeppelin','AC/DC','ZZ Top','Def Leppard'
+
+CREATE OR REPLACE TABLE
+`brjo4089.mydb.classicrock`
+AS
+  SELECT
+  *
+  FROM
+  `brjo4089.listenbrainz.listen`
+WHERE
+artist_name IN('Led Zeppelin', 'AC/DC', 'ZZ Top', 'Def Leppard')
+
+;
+#Q2: Complete the SQL code that would insert 3 new artists from the listenbrainz dataset to the mydb.classicrock table. Insert the following artists: Creedence Clearwater Revival, Kiss, Steve Miller Band
+
+
+INSERT INTO
+`brjo4089.mydb.classicrock`
+SELECT *
+FROM
+`listenbrainz.listenbrainz.listen`
+WHERE
+artist_name IN('Creedence Clearwater Revival', 'Kiss', 'Steve Miller Band')
+
+;
+#Q3: Now, add a column to the classicrock table named, genre, so we can store the musical genre in our dataset.
+ALTER TABLE
+`brjo4089.mydb.classicrock`
+ADD COLUMN
+genre STRING
+;
+#Q4: Take a look at your classicrock table and the values (or non values) stored in the genre column you just created. You should see a bunch of null values for every record in that table because you haven't placed any data in that column yet. Practice some DML commands to update the records in the classicrock table to 'Classic Rock'.
+
+UPDATE
+  `brjo4089.mydb.classicrock`
+SET genre = 'Classic Rock'
+WHERE
+  genre IS NUll
+
+;
+#Q5: How many total records are in the classicrock table we built in this exercise?
+SELECT
+*
+FROM
+`brjo4089.mydb.classicrock`
+;
+#view to simplify the process of filtering products
+CREATE VIEW
+`styssql.prodCustJoin`
+AS
+SELECT
+cust.cust_name,
+cust.cust_contact,
+ordI.prod_id
+FROM
+`brjo4089.styssql.customers` AS cust
+INNER JOIN
+`brjo4089.styssql.orders` AS ord
+ON
+cust.cust_id = ord.cust_id
+INNER JOIN
+`brjo4089.styssql.order_items` AS ordI
+ON
+ord.order_num = ordI.order_num
+
+;
+#Question: Who are all the customers that ordered product 'RGAN01'?
+SELECT
+  *
+FROM
+  `culeeds.stssql.prodCustJoin` AS prodview
+WHERE 
+prodview.prod_id - 'RGAN01'
+;
+# Views can be used to reformat data
+CREATE VIEW
+`styssql.vendLocations`
+AS
+SELECT
+*,
+concat(trim(vend_name), '(', trim(vend_country), ')') AS vendLoc
+FROM
+`styssql.vendors` AS vend
+;
+SELECT 
+*
+FROM
+`styssql.vendLocations`
+;
+#Views can be used to filter out unwanted data
+CREATE VIEW
+`styssql.custemaillist`
+AS
+SELECT *
+FROM
+`styssql.customers` AS cust
+WHERE
+cust.cust_email IS NOT NULL
+;
+SELECT *
+FROM
+`styssql.custemaillist`
+;
+#Views can be used for calculated fields
+CREATE VIEW
+`styssql.totCost`
+AS
+SELECT
+*,
+ROUND(ordI.quantity * ordI.item_price, 2) AS totCost
+FROM
+`styssql.order_items` AS ordi
+;
+SELECT
+*
+FROM
+`styssql.totCost`
