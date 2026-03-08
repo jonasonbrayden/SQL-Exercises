@@ -1,0 +1,60 @@
+#You've been asked to collect data on Earthquakes across the Globe. They want you to create a view with the following information:
+  CREATE VIEW
+    `brjo4089.mydb.eqChallenge`
+  AS
+  SELECT
+  year,
+  country,
+  COUNT(id) as EQs,
+  total_deaths,
+  total_injuries,
+  CASE
+    WHEN flag_tsunami IS NOT NULL THEN 1
+    ELSE NULL
+  END AS Tsunami_flag,
+  CASE
+    WHEN country IN ([ENTER SOUTH AMERICAN COUNTRIES HERE]) THEN 'South America'
+    WHEN country IN ([ENTER NORTH AMERICAN COUNTRIES HERE]) THEN 'North America'
+    WHEN country IN ([ENTER EUROPEAN COUNTRIES HERE]) THEN 'Europe'
+    ELSE 'Other'
+  END AS continent,
+  CASE 
+    WHEN total_deaths IS NULL THEN NULL
+    WHEN SUM(total_deaths) > (SELECT ROUND(AVG(total_deaths),2) FROM `bigquery-public-data.noaa_significant_earthquakes.earthquakes`) THEN 1
+    ELSE 0
+  END AS High_death_flag,
+  CASE 
+    WHEN total_injuries IS NULL THEN NULL 
+    WHEN SUM(total_injuries) > (SELECT ROUND(AVG(total_injuries),2) FROM `bigquery-public-data.noaa_significant_earthquakes.earthquakes`) THEN 1
+    ELSE 0
+  END AS High_injuries_flag
+FROM 
+  `bigquery-public-data.noaa_significant_earthquakes.earthquakes`
+GROUP BY
+  year, 
+  country,
+  flag_tsunami,
+  total_deaths,
+  total_injuries
+  ;
+  #How many total earthquakes where have there been in our "v_EqChallenge" view?
+  SELECT
+  COALESCE(continent,'GRAND TOTAL') AS continents,
+  COALESCE(country,'CONTINENT TOTAL') AS countries, 
+  SUM(EQs) AS totalEQs,
+  SUM(Tsunami_flag) AS totTsunami,
+  SUM(High_death_flag) AS totHighDeath,
+  SUM(total_deaths) AS totDeath,
+  ROUND(AVG(total_deaths),2) AS avgDeaths,
+  SUM(High_injuries_flag) AS totHighInjuries,
+  SUM(total_injuries) AS totInjuries,
+  ROUND(AVG(total_deaths),2) AS avgInjuries
+FROM
+  `elite-totality-301818.mydb.eqChallenge`
+WHERE
+  year >= 1800
+GROUP BY 
+  ROLLUP(continent,country)
+ORDER BY
+  totalEQs DESC,
+  continent
