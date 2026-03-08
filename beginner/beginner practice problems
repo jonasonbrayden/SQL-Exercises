@@ -1,0 +1,323 @@
+#Q1: What is the highest pitch speed?
+SELECT
+  p.pitchSpeed
+FROM
+  `bigquery-public-data.baseball.games_wide` AS p
+ORDER BY
+  p.pitchSpeed DESC
+;
+#Q2: How many pitchers are right handed?
+SELECT
+  r.pitcherThrowHand
+FROM
+  `bigquery-public-data.baseball.games_wide` AS r
+WHERE
+  r.pitcherThrowHand = 'R'
+;
+#Q3: How many unique mascots are there?
+SELECT DISTINCT
+  m.mascot
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS m
+;
+#Q4: How many total records include country names that contain  'Arab'?
+SELECT
+  u.geoNetwork.country
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170731` AS u
+WHERE
+  u.geoNetwork.country LIKE '%Arab%'
+;
+#Q5: How many mascots are there whose name of the university's team starts with the letter 'B' and are from the non-Linnean type of being or creature of 'Aristocrats'?
+SELECT
+  b.name,
+  b.non_tax_type
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS b
+WHERE
+  b.name LIKE 'B%'
+  AND
+  b.non_tax_type = 'Aristocrats'
+;
+#Q6: How many unique hurricane names were there in the 'WP' basin during the years 1997, 2000, or 2010 whose names started with either A or B?
+SELECT DISTINCT
+  h.name,
+  h.basin,
+  h.season
+FROM
+  `bigquery-public-data.noaa_hurricanes.hurricanes` AS h
+
+WHERE
+  h.basin = 'WP' 
+  AND 
+  h.season IN('1997','2000','2010')
+  AND 
+  (h.name LIKE "A%" OR h.name LIKE "B%")
+  ;
+  #Q3: What was the average sea level pressure in June rounded to 2 decimal places?
+SELECT
+  p.month,
+  ROUND(AVG(p.sea_level_pressure),2) AS avgSeaLevel
+FROM
+  `bigquery-public-data.noaa_icoads.icoads_core_2016` AS p
+WHERE
+  p.month = 6
+GROUP BY
+  p.month
+;
+#Q4: Which 3 zip codes have the largest population?
+SELECT DISTINCT
+  zip.zipcode,
+  zip.population
+FROM
+  `bigquery-public-data.census_bureau_usa.population_by_zip_2000` AS zip
+ORDER BY
+  zip.population DESC
+;
+#Q5: What is the average monthly ship speed in January and February for ship courses 1 and 2?  
+SELECT
+  ship.month,
+  ship.ship_course,
+  ROUND(AVG(ship.ship_speed),2) AS avg_speed
+FROM
+  `bigquery-public-data.noaa_icoads.icoads_core_2016` AS ship
+WHERE
+  ship.month = 1 OR ship.month = 2
+GROUP BY
+  ship.month,
+  ship.ship_course
+HAVING
+  ship.ship_course = 1 OR ship.ship_course =2
+;
+#Q6: What was the average damage (in millions of dollars) for earthquakes in Italy?
+SELECT
+  ROUND(AVG(dam.damage_millions_dollars), 2) AS avgDamage,
+  dam.country
+FROM
+  `bigquery-public-data.noaa_significant_earthquakes.earthquakes` AS dam
+WHERE
+  dam.country = "ITALY"
+GROUP BY
+  dam.country
+  ;
+#Q7: What was the average damage in millions of dollars in Italy for earthquakes between the years 2010 and 2015 that had a primary magnitude greater than 4? 
+SELECT DISTINCT
+  ROUND(AVG(dam.damage_millions_dollars), 2) AS avgDamage,
+  dam.country,
+  dam.year,
+  dam.eq_primary
+FROM
+  `bigquery-public-data.noaa_significant_earthquakes.earthquakes` AS dam
+WHERE
+  dam.country = "ITALY" AND dam.year BETWEEN 2010 AND 2015
+GROUP BY
+  dam.country,
+  dam.year,
+  dam.eq_primary
+HAVING
+  dam.eq_primary > 4
+;
+#Q8: How many zip codes have an average male population across all age segments greater than 2000 and a total male population greater than 50,000?
+SELECT
+  COUNT(male.zipcode) AS zipcode,
+  ROUND(AVG(male.population), 2) AS avgPop,
+  COUNT(male.population) AS totPop,
+FROM
+  `bigquery-public-data.census_bureau_usa.population_by_zip_2010` AS male
+WHERE
+  male.gender = "male"
+GROUP BY
+  male.zipcode
+HAVING
+  avgPop > 2000 AND totPop >50000
+ORDER BY
+  totPop DESC,
+  male.zipcode DESC
+  ;
+  # How many unique browsers were people using to access our website?
+
+SELECT DISTINCT
+u.device.browser
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS u
+# Answer:15
+;
+
+#Q2: How many total records are returned for people using Chrome to access our website?
+
+SELECT 
+u.device.browser
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS u
+  WHERE
+  u.device.browser = 'Chrome'
+  #Answer: 1900
+;
+#Q3:  How many total records are returned for total page views between 5 and 10?
+
+SELECT 
+u.visitId,
+u.totals.pageviews
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS u
+  WHERE
+  u.totals.pageviews BETWEEN 5 AND 10
+#Answer: 332
+;
+
+#Q4: How many total records are returned for total transaction revenue (totals.transactionRevenue) greater than 10,000,000?
+
+SELECT 
+u.visitId,
+u.totals.transactionRevenue
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS u
+  WHERE
+  u.totals.transactionRevenue > 10000000
+
+#Answer: 40
+;
+#Q1: How many total records are returned for visitNumber 1 using 'Chrome' to access our website?
+SELECT
+  u.device.browser,
+  u.visitNumber,
+  u.visitId
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS u
+WHERE
+  u.visitNumber = 1 AND u.device.browser = 'Chrome'
+;
+#Q2: How many unique countries are there that start with 'United'?
+SELECT DISTINCT
+  u.geoNetwork.country
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS u
+WHERE
+  u.geoNetwork.country LIKE 'United%'
+;
+#Q3: What are all the countries that have 'Arab' in their name?
+SELECT DISTINCT
+  u.geoNetwork.country,
+  u.visitId
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS u
+WHERE
+  u.geoNetwork.country LIKE '%Arab%'
+ORDER BY
+  u.geoNetwork.country DESC
+;
+#Q4: How many total records include country names that contain  'Arab'?
+SELECT
+  u.geoNetwork.country,
+  u.visitId
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS u
+WHERE
+  u.geoNetwork.country LIKE '%Arab%'
+;
+#Q5: How many total records are there from mobile devices that include country names that contain  'Arab' or 'United'?
+SELECT
+  u.geoNetwork.country,
+  u.visitId,
+  u.device.browser,
+  u.device.isMobile
+FROM
+  `bigquery-public-data.google_analytics_sample.ga_sessions_20170801` AS u
+WHERE
+  (u.geoNetwork.country LIKE'%Arab%' OR u.geoNetwork.country LIKE'%United%') 
+  AND device.isMobile = TRUE
+  ;
+  #Q1: How many airport types are there?
+SELECT DISTINCT
+  f.airport_type
+FROM
+  `bigquery-public-data.faa.us_airports` AS f
+#A: 6
+;
+#Q2: How many storm event types include the word "wind"?
+SELECT DISTINCT
+  f.event_type
+FROM
+  `bigquery-public-data.noaa_historic_severe_storms.storms_2016` AS f
+WHERE 
+  f.event_type LIKE '%wind%'
+#A: 8
+;
+#Q3: How many unique types of accidents were reported in the accident_2016 table?
+SELECT DISTINCT
+  f.first_harmful_event_name
+FROM
+  `bigquery-public-data.nhtsa_traffic_fatalities.accident_2016` AS f
+#A: 51
+;
+#Q4: How many hurricanes were there in 1990 whose names started with either A or B?
+SELECT DISTINCT
+  f.season,
+  f.name
+FROM
+  `bigquery-public-data.noaa_hurricanes.hurricanes` AS f
+WHERE
+  (f.name LIKE 'A%' 
+  OR
+  f.name LIKE'B%')
+  AND
+  f.season = '1990'
+  #A: 11
+;
+#Q5: What are the names of the hurricanes that occurred in 1990 whose names started with either A or B?
+SELECT DISTINCT
+  f.season,
+  f.name
+FROM
+  `bigquery-public-data.noaa_hurricanes.hurricanes` AS f
+WHERE
+  (f.name LIKE 'A%' 
+  OR
+  f.name LIKE'B%')
+  AND
+  f.season = '1990'
+  ORDER BY 
+  f.name ASC
+  #A: ABE AKA   BESSI BORIS
+;
+#Q6: How many games had attendance greater than 50,000?
+SELECT DISTINCT
+  f.attendance
+FROM
+  `bigquery-public-data.baseball.games_wide` AS f
+WHERE
+f.attendance >50000
+#A. 14
+;
+#Q7:Which teams played in the game with the largest attendance?
+SELECT
+  f.attendance,
+  f.awayTeamName,
+  f.homeTeamName
+
+FROM
+  `bigquery-public-data.baseball.games_wide` AS f
+WHERE
+f.attendance >50000 
+ORDER BY
+f.attendance DESC
+;
+#Q8: How many unique mascots are there that start with the letter M?
+SELECT DISTINCT
+f.mascot
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS f
+WHERE
+  f.mascot LIKE "M%"
+;
+#Q9: What are the first four mascot names that start with the letter 'M' when sorting in reverse ABC order?
+SELECT DISTINCT
+f.mascot
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS f
+WHERE
+  f.mascot LIKE "M%"
+ORDER BY 
+ f.mascot DESC
+ ;
+ 
