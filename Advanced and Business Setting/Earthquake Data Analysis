@@ -58,3 +58,31 @@ GROUP BY
 ORDER BY
   totalEQs DESC,
   continent
+;
+#Q6: What was the average damage (in millions of dollars) for earthquakes in Italy?
+SELECT
+  ROUND(AVG(dam.damage_millions_dollars), 2) AS avgDamage,
+  dam.country
+FROM
+  `bigquery-public-data.noaa_significant_earthquakes.earthquakes` AS dam
+WHERE
+  dam.country = "ITALY"
+GROUP BY
+  dam.country
+  ;
+#Q7: What was the average damage in millions of dollars in Italy for earthquakes between the years 2010 and 2015 that had a primary magnitude greater than 4? 
+SELECT DISTINCT
+  ROUND(AVG(dam.damage_millions_dollars), 2) AS avgDamage,
+  dam.country,
+  dam.year,
+  dam.eq_primary
+FROM
+  `bigquery-public-data.noaa_significant_earthquakes.earthquakes` AS dam
+WHERE
+  dam.country = "ITALY" AND dam.year BETWEEN 2010 AND 2015
+GROUP BY
+  dam.country,
+  dam.year,
+  dam.eq_primary
+HAVING
+  dam.eq_primary > 4
