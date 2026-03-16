@@ -14,3 +14,20 @@ GROUP BY
     )
 ORDER BY
   hits DESC
+;
+#Q1: What is the highest pitch speed?
+SELECT
+  p.pitchSpeed
+FROM
+  `bigquery-public-data.baseball.games_wide` AS p
+ORDER BY
+  p.pitchSpeed DESC
+;
+#Q2: How many pitchers are right handed?
+SELECT
+  r.pitcherThrowHand
+FROM
+  `bigquery-public-data.baseball.games_wide` AS r
+WHERE
+  r.pitcherThrowHand = 'R'
+;
