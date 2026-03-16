@@ -146,3 +146,56 @@ FROM
   `brjo4089.styssql.order_items` AS ordi
   ON
   ord.order_num = ordi.order_num
+;
+#Left Outer Join
+# How many orders has each customer placed?
+SELECT
+cust.cust_id,
+cust.cust_name,
+COUNT(ord.order_num) AS cust_orders
+FROM
+  `brjo4089.styssql.customers` AS cust
+  LEFT JOIN
+  `brjo4089.styssql.orders` AS ord
+  ON
+  cust.cust_id = ord.cust_id
+GROUP BY
+cust.cust_id,
+cust.cust_name
+;
+#How many orders have been placed for each of our products?
+SELECT
+prod.prod_id,
+prod.prod_name,
+COUNT (DISTINCT ordi.order_num) AS prod_orders
+FROM
+`brjo4089.styssql.products` AS prod
+LEFT JOIN
+`brjo4089.styssql.order_items` AS ordi
+ON
+prod.prod_id = ordi.prod_id
+GROUP BY 
+prod.prod_id,
+prod.prod_name
+#Find orders that do now have an order yet
+HAVING
+prod_orders=0
+;
+#Self Join
+#What are all the customer names and emails for every company contact that works at the same company as Jim Jones?
+SELECT
+cust1.cust_id,
+cust1.cust_name,
+cust1.cust_contact AS contact_1,
+cust1.cust_email,
+cust2.cust_contact AS contact_2
+FROM
+  `brjo4089.styssql.customers` AS cust1
+  LEFT JOIN
+  `brjo4089.styssql.customers` AS cust2
+  ON
+  cust1.cust_name= cust2.cust_name
+WHERE
+cust2.cust_contact = "Jim Jones"
+;
+
