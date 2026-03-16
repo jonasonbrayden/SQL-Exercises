@@ -1,0 +1,226 @@
+#INNER JOIN REVIEW
+#What was the total order quantity for each vendor?
+# Additionally, show the total number of vendors as, num_vendors, and the average order quantity per vendor
+SELECT
+vend.vend_id,
+vend.vend_name,
+SUM(ordi.quantity) AS vendor_qty,
+(SELECT 
+COUNT(vend.vend_id) AS tot_vends
+FROM
+`brjo4089.styssql.vendors` AS vend),
+
+ROUND((SELECT SUM(quantity) FROM `brjo4089.styssql.order_items`)
+/
+(SELECT COUNT(vend_id) FROM `brjo4089.styssql.vendors`), 2) AS avg_qty_per_vend
+
+FROM
+  `brjo4089.styssql.order_items` AS ordi
+  INNER JOIN
+  `brjo4089.styssql.products` AS prod
+  ON
+  ordi.prod_id = prod.prod_id
+  INNER JOIN
+  `brjo4089.styssql.vendors` AS vend
+  ON
+  prod.vend_id = vend.vend_id
+GROUP BY
+vend.vend_id,
+vend.vend_name
+ORDER BY
+vendor_qty DESC
+;
+#  What are all the vendors with or without an order associated with their products?
+SELECT
+vend.vend_id,
+vend.vend_name,
+prod.prod_id,
+prod.prod_name,
+SUM(ordi.quantity) AS totOrd
+FROM
+`brjo4089.styssql.vendors` AS vend
+LEFT JOIN
+`brjo4089.styssql.products` AS prod
+ON
+vend.vend_id = prod.vend_id
+LEFT JOIN
+`brjo4089.styssql.order_items` AS ordi
+ON prod.prod_id= ordi.prod_id
+GROUP BY
+vend.vend_id,
+vend.vend_name,
+prod.prod_id,
+prod.prod_name
+ORDER BY
+vend.vend_name,
+totOrd DESC
+;
+# What vendors are missing product information? 
+SELECT
+vend.vend_id,
+vend.vend_name,
+prod.prod_id,
+prod.prod_name,
+FROM
+`brjo4089.styssql.vendors` AS vend
+LEFT JOIN
+`brjo4089.styssql.products` AS prod
+ON
+vend.vend_id = prod.vend_id
+WHERE
+prod.prod_id IS NULL
+ORDER BY
+prod.prod_id
+;
+#Who are all our vendors that have product information but don’t have an order for certain products yet?  
+SELECT
+vend.vend_id,
+vend.vend_name,
+prod.prod_id,
+prod.prod_name
+FROM
+  `brjo4089.styssql.vendors` AS vend
+  INNER JOIN
+  `brjo4089.styssql.products` AS prod
+  ON
+  vend.vend_id =prod.vend_id
+  LEFT JOIN
+  `brjo4089.styssql.order_items` AS ordi
+  ON prod.prod_id= ordi.prod_id
+WHERE
+ordi.order_num IS NULL
+ORDER BY
+vend.vend_name,
+prod.prod_name
+;
+# What are all the orders in our database?
+SELECT
+cust.cust_name,
+ord.order_num,
+ordi.order_item,
+prod.prod_id,
+prod.prod_name,
+vend.vend_name
+
+FROM
+  `brjo4089.styssql.customers` AS cust
+  INNER JOIN
+   `brjo4089.styssql.orders` AS ord
+   ON
+   cust.cust_id= ord.cust_id
+  INNER JOIN
+  `brjo4089.styssql.order_items` AS ordi
+  ON
+  ord.order_num = ordi.order_num
+  INNER JOIN
+  `brjo4089.styssql.products` AS prod
+  ON
+  prod.prod_id = ordi.prod_id
+  INNER JOIN
+  `brjo4089.styssql.vendors` AS vend
+  ON
+  vend.vend_id= prod.vend_id
+  ORDER BY
+  cust.cust_name,
+  prod.prod_name
+  ;
+  #What was the total order quantity for each vendor?
+SELECT
+vend.vend_id,
+vend.vend_name,
+SUM(ordi.quantity) AS vend_qty
+FROM
+  `brjo4089.styssql.order_items` AS ordi
+  INNER JOIN
+  `brjo4089.styssql.products` AS prod
+  ON
+  prod.prod_id = ordi.prod_id
+  INNER JOIN
+  `brjo4089.styssql.vendors` AS vend
+  ON
+  vend.vend_id= prod.vend_id
+GROUP BY
+vend.vend_id,
+vend.vend_name
+ORDER BY
+vend_qty DESC
+;
+#: What vendors (vend_id) have an average product price greater than $9 when only considering product prices greater than $4?
+SELECT
+prod.vend_id,
+AVG(prod.prod_price) AS AVGover4
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+  prod.prod_price > 4
+GROUP BY
+  vend_id
+HAVING
+AVGover4 > 9
+;
+#Q1: What are all the products with a vendor id of DLL01 and a price of $4 or less?
+
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+    prod.vend_id = 'DLL01' AND prod.prod_price <=4
+;
+#Q2: What are all the products from the venfors with Ids of DLL01 or BRS01?
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+    prod.vend_id = 'DLL01' OR prod.vend_id = 'BRS01'
+;
+#Q2b. same question but different approach
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+    prod.vend_id IN ('DLL01','BRS01') -- This is the same as doing the OR statement on line 24
+;
+#Q3: What are all the products we source from the vendors wth ids of DLL01 and BRS01 that have prices above $10?
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE 
+    prod.vend_id ='DLL01'OR prod.vend_id ='BRS01' AND prod.prod_price > 10
+;
+#Answering Question 3 the correct way
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE 
+    (prod.vend_id ='DLL01'OR prod.vend_id ='BRS01') AND prod.prod_price > 10
+;
+#Q4:What are the products from vendors excluding those with the id of DLL01?
+SELECT
+prod.prod_id,
+prod.prod_name,
+prod.prod_price,
+prod.vend_id
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE 
+    NOT prod.vend_id = 'DLL01';
