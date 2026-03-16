@@ -1,0 +1,70 @@
+#Create a new column named, timeZone, in the data warehouse table, dw_covid19, that we created in the lesson, W13D2 BI and Data Warehousing Practice Exercises. The datatype for timeZone should be a string. 
+
+ALTER TABLE
+  `brjo4089.mydb.dw_covid19`
+ADD COLUMN
+  timeZone STRING
+;
+#Q2:
+UPDATE
+`brjo4089.mydb.dw_covid19`
+SET
+timeZone=
+CASE WHEN state IN('CO','MT','NM','UT', 'WY', 'AZ' ) THEN 'Mountain' 
+WHEN state IN('CA','NV', 'OR', 'WA') THEN 'Pacific' ELSE 'Other' END
+WHERE
+timeZone IS NULL
+
+
+
+;
+#Q3: 
+SELECT
+  SUM(CASE WHEN date = '2022-4-01' THEN confirmed_cases END) AS totCases,
+  SUM(CASE WHEN date = '2022-4-01' THEN deaths END) AS totDeaths,
+  SUM(CASE WHEN date = '2022-4-01' THEN population END) AS totPop,
+  (SELECT SUM(CASE WHEN date = '2022-4-01' THEN confirmed_cases END)/SUM    (CASE WHEN date = '2022-4-01' THEN population END) *100000
+  FROM `brjo4089.mydb.dw_covid19`) AS casesper100k,
+  (SELECT SUM(CASE WHEN date = '2022-4-01' THEN deaths END)/SUM(CASE WHEN   date = '2022-4-01' THEN population END) *100000
+  FROM `brjo4089.mydb.dw_covid19`) AS deathsper100k
+
+FROM
+  `brjo4089.mydb.dw_covid19`
+;
+#Q4: As of 4/1/2022, what are the total and average cases, deaths, and population for Colorado and California? 
+SELECT
+  state  AS ST,
+  county_name AS county,
+  SUM(CASE WHEN date = '2022-4-01' THEN confirmed_cases END) AS totCases,
+  SUM(CASE WHEN date = '2022-4-01' THEN deaths END) AS totDeaths,
+  SUM(CASE WHEN date = '2022-4-01' THEN population END) AS totPop,
+  AVG(CASE WHEN date = '2022-4-01' THEN confirmed_cases END) AS avgCases,
+  AVG(CASE WHEN date = '2022-4-01' THEN deaths END) AS avgDeaths,
+  AVG(CASE WHEN date = '2022-4-01' THEN population END) AS avgPop
+FROM
+  `brjo4089.mydb.dw_covid19`
+WHERE
+state = "CO" OR state= "CA"
+GROUP BY
+ROLLUP(state,
+county_name)
+ORDER BY
+totCases DESC
+;
+#Q5: As of 2/1/2022, what were the total cases for each time zone? 
+SELECT
+  timeZone,
+  SUM(CASE WHEN date = '2022-2-01' THEN confirmed_cases END) AS totCases,
+  SUM(CASE WHEN date = '2022-2-01' THEN deaths END) AS totDeaths,
+  SUM(CASE WHEN date = '2022-2-01' THEN population END) AS totPop,
+ (SELECT SUM(CASE WHEN date = '2022-4-01' THEN confirmed_cases END)/SUM    (CASE WHEN date = '2022-4-01' THEN population END) *100000
+  FROM `brjo4089.mydb.dw_covid19`) AS casesper100k,
+  (SELECT SUM(CASE WHEN date = '2022-4-01' THEN deaths END)/SUM(CASE WHEN   date = '2022-4-01' THEN population END) *100000
+  FROM `brjo4089.mydb.dw_covid19`) AS deathsper100k
+
+FROM
+  `brjo4089.mydb.dw_covid19`
+  GROUP BY
+ timeZone
+ ORDER BY
+ casesper100k DESC
