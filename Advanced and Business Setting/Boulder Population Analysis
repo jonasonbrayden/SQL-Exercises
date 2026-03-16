@@ -1,0 +1,47 @@
+ #What is the total population in each of the Boulder zipcodes 80301, 80302, 80303, 80304, and 80310 and the total population for all those zipcodes combined
+SELECT
+pop.zipcode,
+pop.population AS zipPop,
+(SELECT SUM(pop.population)
+FROM `bigquery-public-data.census_bureau_usa.population_by_zip_2010`AS pop
+WHERE
+pop.gender IS NULL
+AND
+pop.zipcode IN("80301", "80302", "80303", "80304", "80310")
+) AS totPop
+FROM
+  `bigquery-public-data.census_bureau_usa.population_by_zip_2010` AS pop
+WHERE
+pop.zipcode IN("80301", "80302", "80303", "80304", "80310")
+AND
+pop.gender IS NULL
+GROUP BY
+pop.population,
+pop.zipcode
+;
+#Q3: (Reference Question1)  What is each of Boulder's zip codes proportion of the total?
+SELECT
+pop.zipcode,
+pop.population AS zipPop,
+  (SELECT SUM(pop.population)
+  FROM `bigquery-public-data.census_bureau_usa.population_by_zip_2010`AS pop
+  WHERE
+  pop.gender IS NULL
+  AND
+  pop.zipcode IN("80301", "80302", "80303", "80304", "80310")
+  ) AS totPop,
+pop.population/
+    (SELECT(SUM(pop.population)) 
+    FROM 
+    `bigquery-public-data.census_bureau_usa.population_by_zip_2010`AS pop
+    WHERE pop.gender IS NULL
+    AND pop.zipcode IN("80301", "80302", "80303", "80304", "80310") ) AS ratio
+FROM
+  `bigquery-public-data.census_bureau_usa.population_by_zip_2010` AS pop
+WHERE
+  pop.zipcode IN("80301", "80302", "80303", "80304", "80310")
+AND
+pop.gender IS NULL
+GROUP BY
+pop.population,
+pop.zipcode
