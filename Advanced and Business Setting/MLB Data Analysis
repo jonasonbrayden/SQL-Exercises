@@ -31,3 +31,25 @@ FROM
 WHERE
   r.pitcherThrowHand = 'R'
 ;
+#Q6: How many games had attendance greater than 50,000?
+SELECT DISTINCT
+  f.attendance
+FROM
+  `bigquery-public-data.baseball.games_wide` AS f
+WHERE
+f.attendance >50000
+#A. 14
+;
+#Q7:Which teams played in the game with the largest attendance?
+SELECT
+  f.attendance,
+  f.awayTeamName,
+  f.homeTeamName
+
+FROM
+  `bigquery-public-data.baseball.games_wide` AS f
+WHERE
+f.attendance >50000 
+ORDER BY
+f.attendance DESC
+;
