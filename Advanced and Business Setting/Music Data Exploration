@@ -1,0 +1,155 @@
+#What are Janis Joplins most popular songs?
+SELECT
+list.artist_name,
+list.track_name,
+COUNT(list.listened_at) AS listens
+FROM
+  `brjo4089.listenbrainz.listen` AS list
+WHERE
+artist_name = "Janis Joplin"
+GROUP BY
+list.artist_name,
+list.track_name
+ORDER BY
+listens DESC
+;
+# MY TRY
+ #What were Mariah Carey's total listens as well as average listens per user? 
+ SELECT
+list.artist_name,
+list.user_name,
+COUNT(list.listened_at) AS user_listens,
+COUNT (DISTINCT user_name) AS total_users,
+COUNT(list.listened_at)/COUNT(DISTINCT user_name)avglistensperuser,
+(SELECT
+COUNT(list.listened_at) 
+FROM
+  `brjo4089.listenbrainz.listen` AS list
+WHERE 
+artist_name = "Mariah Carey") AS total_listens ,
+(SELECT
+COUNT(list.listened_at)/COUNT (DISTINCT user_name)
+
+FROM`brjo4089.listenbrainz.listen` AS list
+) AS avg_user_listens
+
+FROM
+  `brjo4089.listenbrainz.listen` AS list
+
+WHERE
+artist_name = "Mariah Carey"
+GROUP BY
+list.artist_name,
+list.user_name
+ORDER BY
+user_listens DESC
+;
+#CORRECT ANSWER USING IN-LINE VIEW
+SELECT
+artist_name,
+SUM(listens) AS totlistens,
+ROUND(AVG(listens),2) AS avgUserListens
+
+FROM
+
+(
+  SELECT
+  artist_name,
+  user_name,
+  COUNT(listened_at) AS listens
+  FROM
+  `brjo4089.listenbrainz.listen`
+  WHERE
+  artist_name = "Mariah Carey"
+  GROUP BY
+  artist_name,
+  user_name
+  ORDER BY
+  listens DESC
+) AS view1
+
+GROUP BY
+artist_name
+ORDER BY
+totlistens DESC
+;
+#Whitney Houston, Mariah Carey, Beyonce, Dixie Chicks, Madonna, Ella Fitzgerald, Aretha Franklin, Dolly Parton, Lady Gaga, Shania Twain, and Lizzo
+#What were the total listens for each of the artists listed above?
+
+#Who is the most popular female artist?
+#Based on listens?
+#Based on fans (i.e., users)?
+#Who has the highest average listens per user?
+SELECT
+artist_name,
+COUNT(listened_at) AS artist_listens,
+COUNT(DISTINCT user_name) AS fans,
+ROUND(COUNT(listened_at)/ COUNT(DISTINCT user_name), 2) AS avg_listens_per_fan
+FROM
+  `brjo4089.listenbrainz.listen`
+  WHERE
+  artist_name IN( "Whitney Houston", "Mariah Carey", "Beyonce", "Dixie Chicks", "Madonna", "Ella Fitzgerald", "Aretha Franklin", "Dolly Parton", "Lady Gaga", "Shania Twain", "Lizzo")
+  GROUP BY
+  artist_name
+  ORDER BY
+  artist_listens DESC
+  ;
+  # How many different instances of Beyonce can you find in the listenbrains data set? 
+SELECT DISTINCT
+artist_name
+FROM
+  `brjo4089.listenbrainz.listen`
+WHERE
+artist_name LIKE "%Beyonc%"
+;
+# How many different instances of Beyonce can you find in the listenbrains data set? 
+SELECT DISTINCT
+artist_name
+FROM
+  `brjo4089.listenbrainz.listen`
+WHERE
+artist_name LIKE "Beyonc_"
+
+;
+# Q6:Which users listened to both "Dolly Parton" more than 50 times and "Madonna" more than 50 times? 
+SELECT
+user_name,
+AVG(d_listens),
+COUNT(list.listened_at)
+FROM
+  `brjo4089.listenbrainz.listen` AS list
+  INNER JOIN
+  (
+  SELECT
+  artist_name,
+  user_name,
+  COUNT(listened_at) AS d_listens
+  FROM
+  `brjo4089.listenbrainz.listen` 
+  WHERE
+  artist_name = "Dolly Parton"
+  GROUP BY
+  artist_name,
+  user_name
+  HAVING 
+  d_listens > 50
+  ORDER BY
+  d_listens DESC
+) AS view1
+
+WHERE 
+  artist_name = "Madonna"
+GROUP BY
+  user_name
+HAVING
+  m_listens > 50
+;
+SELECT user_id
+FROM user_songs
+WHERE artist = 'Dolly Parton' AND listens > 50
+AND user_id IN (
+    SELECT user_id
+    FROM user_songs
+    WHERE artist = 'Madonna' AND listens > 50 
+    ;
+    
