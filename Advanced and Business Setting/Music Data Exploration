@@ -152,4 +152,51 @@ AND user_id IN (
     FROM user_songs
     WHERE artist = 'Madonna' AND listens > 50 
     ;
-    
+  #Q1: Create the subset Classic Rock table from listenbrainz dataset. 
+#For now, restrict the artist names being stored in this table to the following string literals :  'Led Zeppelin','AC/DC','ZZ Top','Def Leppard'
+
+CREATE OR REPLACE TABLE
+`brjo4089.mydb.classicrock`
+AS
+  SELECT
+  *
+  FROM
+  `brjo4089.listenbrainz.listen`
+WHERE
+artist_name IN('Led Zeppelin', 'AC/DC', 'ZZ Top', 'Def Leppard')
+
+;
+#Q2: Complete the SQL code that would insert 3 new artists from the listenbrainz dataset to the mydb.classicrock table. Insert the following artists: Creedence Clearwater Revival, Kiss, Steve Miller Band
+
+
+INSERT INTO
+`brjo4089.mydb.classicrock`
+SELECT *
+FROM
+`listenbrainz.listenbrainz.listen`
+WHERE
+artist_name IN('Creedence Clearwater Revival', 'Kiss', 'Steve Miller Band')
+
+;
+#Q3: Now, add a column to the classicrock table named, genre, so we can store the musical genre in our dataset.
+ALTER TABLE
+`brjo4089.mydb.classicrock`
+ADD COLUMN
+genre STRING
+;
+#Q4: Take a look at your classicrock table and the values (or non values) stored in the genre column you just created. You should see a bunch of null values for every record in that table because you haven't placed any data in that column yet. Practice some DML commands to update the records in the classicrock table to 'Classic Rock'.
+
+UPDATE
+  `brjo4089.mydb.classicrock`
+SET genre = 'Classic Rock'
+WHERE
+  genre IS NUll
+
+;
+#Q5: How many total records are in the classicrock table we built in this exercise?
+SELECT
+*
+FROM
+`brjo4089.mydb.classicrock`
+;
+
