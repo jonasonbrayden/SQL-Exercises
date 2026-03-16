@@ -97,4 +97,52 @@ SELECT
       )
     )
 ;
+#Look at ERD
+#What are the customers ids, names, addresses, city, order numbers, an order dates of all customers?
+SELECT
+cust.cust_id,
+cust.cust_name,
+cust.cust_address,
+cust.cust_city,
+ord.order_num,
+ord.order_date
+FROM
+  `brjo4089.styssql.customers` AS cust,
+   `brjo4089.styssql.orders` AS ord
+WHERE
+  cust.cust_id= ord.cust_id
+;
+# Same question but using INNER JOIN in the FROM (more common)
+SELECT
+cust.cust_id,
+cust.cust_name,
+cust.cust_address,
+cust.cust_city,
+ord.order_num,
+ord.order_date
+FROM
+  `brjo4089.styssql.customers` AS cust
+  INNER JOIN
+   `brjo4089.styssql.orders` AS ord
+   ON
+   cust.cust_id= ord.cust_id
 
+;
+#What are the order numbers, order items, product ids, and quantity for all customers?
+SELECT
+cust.cust_id,
+cust.cust_name,
+ord.order_num,
+ordi.order_item,
+ordi.prod_id,
+ordi.quantity
+FROM
+  `brjo4089.styssql.customers` AS cust
+  INNER JOIN
+   `brjo4089.styssql.orders` AS ord
+   ON
+   cust.cust_id= ord.cust_id
+  INNER JOIN
+  `brjo4089.styssql.order_items` AS ordi
+  ON
+  ord.order_num = ordi.order_num
