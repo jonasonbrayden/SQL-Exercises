@@ -83,3 +83,21 @@ WHERE
 ORDER BY
   prod.P_QOH,
   prod.P_CODE DESC
+;
+#What are all the customer numbers that ordered the product 'BR01'?
+SELECT
+  cust.cust_id AS customernum
+  FROM
+  `brjo4089.styssql.customers` AS cust
+  WHERE
+    cust.cust_id IN
+    (SELECT ord.cust_id
+    FROM `brjo4089.styssql.orders` AS ord
+    WHERE ord.order_num
+    IN
+      (SELECT ordi.order_num
+      FROM `brjo4089.styssql.order_items` AS ordi
+      WHERE ordi.prod_id= 'BR01'
+      )
+    )
+;
