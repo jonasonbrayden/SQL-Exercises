@@ -1,0 +1,23 @@
+#Q1:What are the 2 most common mascots?
+SELECT
+  mas.mascot,
+  COUNT(mascot) AS occur
+
+FROM
+  `brjo4089.ncaa_basketball.mascots` AS mas
+GROUP BY
+  mas.mascot
+ORDER BY
+  occur DESC
+  ;
+#Q2: How many Venues have greater than 22000 seats?  and What is the venue name of the venue with the THIRD most seats?
+SELECT
+  ven.venue_name,
+  ven.venue_capacity
+FROM
+  `brjo4089.ncaa_basketball.mbb_teams` AS ven
+WHERE
+  ven.venue_capacity > 22000
+ORDER BY
+ven.venue_capacity DESC
+;
