@@ -21,3 +21,21 @@ WHERE
 ORDER BY
 ven.venue_capacity DESC
 ;
+#Q5: How many mascots are there whose name of the university's team starts with the letter 'B' and are from the non-Linnean type of being or creature of 'Aristocrats'?
+SELECT
+  b.name,
+  b.non_tax_type
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS b
+WHERE
+  b.name LIKE 'B%'
+  AND
+  b.non_tax_type = 'Aristocrats'
+;
+#Q3: How many unique mascots are there?
+SELECT DISTINCT
+  m.mascot
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS m
+;
+
