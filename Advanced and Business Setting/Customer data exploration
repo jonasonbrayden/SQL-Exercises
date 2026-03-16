@@ -1,1 +1,100 @@
+# Q1:What are thecustomers who ordered a particular item?
+SELECT
+ordi.order_num
+FROM
+  `brjo4089.styssql.order_items` AS ordi
+WHERE
+ordi.prod_id='RGAN01'
+;
+#Use answer above to filted what customers places these order
+SELECT
+ord.cust_id
+FROM
+  `brjo4089.styssql.orders` AS ord
+WHERE
+  ord.order_num IN(20008, 20007)
+  ;
+# ANSWER Q1 WITH A SUBQUERY
+SELECT
+ord.cust_id
+FROM
+  `brjo4089.styssql.orders` AS ord
+WHERE
+ord.order_num IN
+
+(SELECT
+ordi.order_num
+FROM
+`brjo4089.styssql.order_items` AS ordi
+WHERE
+ordi.prod_id='RGAN01'
+)
+;
+#Q2:What are the customer names of those who ordered the product, 'RGAN01'?
+SELECT
+  cust.cust_name AS name,
+  cust.cust_id
+  FROM
+  `brjo4089.styssql.customers` AS cust
+  WHERE
+    cust.cust_id IN
+    (SELECT ord.cust_id
+    FROM `brjo4089.styssql.orders` AS ord
+    WHERE ord.order_num
+    IN
+      (SELECT ordi.order_num
+      FROM `brjo4089.styssql.order_items` AS ordi
+      WHERE ordi.prod_id= 'RGAN01'
+      )
+
+  )
+  ;
+  #Subquery in the SELECT clause
+  #Q3: What was the total order quantity for each order as well as overall total quantity and average across all orders?
+  SELECT
+    ordi.order_num,
+    SUM(ordi.quantity) AS order_qty,
+    (SELECT SUM(quantity)FROM `brjo4089.styssql.order_items`) AS total_qty,
+    (SELECT ROUND(SUM(quantity)/ COUNT(DISTINCT order_num),2)
+    FROM `brjo4089.styssql.order_items`
+    ) AS avg_order_qty
+  FROM
+    `brjo4089.styssql.order_items` AS ordi
+  GROUP BY
+  ordi.order_num
+  ;
+  #subquery in the HAVING clause
+  #Q4: What are the products with a total quantity sold greater than the average product qunatity sold?
+  SELECT
+  ordi.prod_id,
+  SUM(ordi.quantity) AS product_qty,
+  (SELECT COUNT(DISTINCT prod_id) FROM `brjo4089.styssql.order_items`) AS total_prods,
+  (SELECT SUM(quantity)FROM `brjo4089.styssql.order_items` ) AS total_qty,
+
+  (SELECT ROUND(SUM(quantity)/COUNT(DISTINCT prod_id), 2) FROM `brjo4089.styssql.order_items` ) AS avg_prod_qty
+
+  FROM
+    `brjo4089.styssql.order_items` AS ordi
+    GROUP BY 
+    ordi.prod_id
+  HAVING
+    product_qty > avg_prod_qty
+;
+#What are all the customer numbers that ordered the product 'BR01'?
+SELECT
+  cust.cust_id AS customernum
+  FROM
+  `brjo4089.styssql.customers` AS cust
+  WHERE
+    cust.cust_id IN
+    (SELECT ord.cust_id
+    FROM `brjo4089.styssql.orders` AS ord
+    WHERE ord.order_num
+    IN
+      (SELECT ordi.order_num
+      FROM `brjo4089.styssql.order_items` AS ordi
+      WHERE ordi.prod_id= 'BR01'
+      )
+    )
+;
 
