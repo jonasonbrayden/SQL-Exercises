@@ -101,3 +101,18 @@ SELECT
       )
     )
 ;
+#What is the average price of our products?
+SELECT
+CONCAT('$', ROUND(AVG(prod.prod_price),2)) AS avgPrice
+FROM
+  `brjo4089.styssql.products` AS prod
+;
+#What is our minimum , average, and maximum prices for all products?
+SELECT
+  COUNT(*) AS totRows,
+  COUNT(prod.prod_id) AS totProds,
+  ROUND(MIN(prod.prod_price),2) AS minPrice,
+  ROUND(AVG(prod.prod_price), 2) AS avgPrice,
+  ROUND(MAX(prod.prod_price),2) AS maxPrice
+FROM
+  `brjo4089.styssql.products` AS prod
