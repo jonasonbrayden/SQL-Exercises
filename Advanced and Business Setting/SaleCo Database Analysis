@@ -1,0 +1,291 @@
+#What is the vendor average units sold per invoice?
+#Show vendor code and vendor name for all vendors as well as the average units sold per invoice for any in-house products (i.e., no vendor info)
+#Calculate and return the total number of invoices for each vendor, the total quantity for each vendor, and the average per invoice for each vendor
+#Calculate the overall average units sold per invoice for the SaleCo company.
+#Sort the results by vendor average in descending order
+SELECT
+vend.V_CODE,
+vend.V_NAME,
+COUNT(DISTINCT line.INV_NUMBER ) AS numInvoices,
+SUM(line.LINE_UNITS) AS vend_units,
+ROUND(SUM(line.line_units)/ COUNT(DISTINCT line.inv_number), 2) AS vendAVG,
+
+(SELECT
+(SUM(line.line_units)/ COUNT(DISTINCT line.inv_number))
+FROM
+`brjo4089.SaleCo.line` AS line
+) AS SalecoavgUnits
+FROM
+  `brjo4089.SaleCo.line` AS line
+INNER JOIN
+  `brjo4089.SaleCo.product` AS prod
+ON
+  line.P_CODE=prod.P_CODE
+LEFT JOIN 
+  `brjo4089.SaleCo.vendor` AS vend
+ON
+prod.V_CODE = vend.V_CODE
+GROUP BY 
+vend.V_CODE,
+vend.V_NAME
+ORDER BY
+vendAVG DESC
+;
+#Who are all our customers in our database now that we have acquired another company?
+SELECT
+  cus.cus_lname,
+  cus.cus_fname,
+  cus.cus_areacode,
+  cus.cus_phone
+FROM
+  `brjo4089.SaleCo.customer` AS cus
+
+UNION DISTINCT
+SELECT
+  cus2.cus_lname,
+  cus2.cus_fname,
+  cus2.cus_areacode,
+  cus2.cus_phone
+FROM
+  `brjo4089.SaleCo.customer_2` AS cus2
+ORDER BY
+cus_lname
+;
+#Who are all the customers in our database?
+SELECT
+  cus.cus_lname,
+  cus.cus_fname,
+  cus.cus_areacode,
+  cus.cus_phone
+FROM
+  `brjo4089.SaleCo.customer` AS cus
+
+UNION ALL
+SELECT
+  cus2.cus_lname,
+  cus2.cus_fname,
+  cus2.cus_areacode,
+  cus2.cus_phone
+FROM
+  `brjo4089.SaleCo.customer_2` AS cus2
+ORDER BY
+cus_lname DESC
+;
+# Which customers patronized both companies (SaleCo and the newly acquired company)? 
+SELECT
+  cus.cus_lname,
+  cus.cus_fname,
+  cus.cus_areacode,
+  cus.cus_phone
+FROM
+  `brjo4089.SaleCo.customer` AS cus
+
+INTERSECT DISTINCT #returns only records that exist between both queries
+SELECT
+  cus2.cus_lname,
+  cus2.cus_fname,
+  cus2.cus_areacode,
+  cus2.cus_phone
+FROM
+  `brjo4089.SaleCo.customer_2` AS cus2
+ORDER BY
+cus_lname 
+;
+#Who are all the customers from the original customer list (CUSTOMER) that are not in the newly acquired list (Customer_2)?
+SELECT
+  cus.cus_lname,
+  cus.cus_fname,
+  cus.cus_areacode,
+  cus.cus_phone
+FROM
+  `brjo4089.SaleCo.customer` AS cus
+
+EXCEPT DISTINCT 
+SELECT
+  cus2.cus_lname,
+  cus2.cus_fname,
+  cus2.cus_areacode,
+  cus2.cus_phone
+FROM
+  `brjo4089.SaleCo.customer_2` AS cus2
+ORDER BY
+cus_lname ;
+#In Line View
+# Who are the customers that have purchased two specific products?
+SELECT DISTINCT
+  cust.cus_code, 
+  cust.cus_lname
+FROM 
+  `brjo4089.SaleCo.customer` as cust
+  INNER JOIN 
+    (SELECT 
+      invoice.cus_code
+      FROM
+      `brjo4089.SaleCo.invoice` as invoice
+      INNER JOIN
+      `brjo4089.SaleCo.line` as line
+      ON
+      invoice.inv_number = line.inv_number
+      WHERE
+      line.p_code = '13-Q2/P2') as CustProd1
+      ON
+      cust.cus_code = CustProd1.cus_code
+
+  INNER JOIN
+    (SELECT 
+      invoice.cus_code
+      FROM
+      `brjo4089.SaleCo.invoice` as invoice
+      INNER JOIN
+      `brjo4089.SaleCo.line` as line
+      ON
+      invoice.inv_number = line.inv_number
+      WHERE
+      line.p_code = '23109-HB') as CustProd2
+      ON
+      CustProd1.cus_code = CustProd2.cus_code
+      ;
+
+#CTEs
+#Q: What are the total product sales and the employee contribution to the product sales?
+WITH prodsummary
+AS 
+
+(SELECT
+p_code, 
+SUM(LINE_UNITS * LINE_PRICE) AS pSales,
+
+  (SELECT
+  COUNT(EMP_NUM) FROM `brjo4089.SaleCo.employee`) AS eCount 
+FROM
+` brjo4089.SaleCo.line`
+GROUP BY
+p_code
+)
+
+SELECT
+prodsummary.p_code,
+prodsummary.pSales,
+prodsummary.eCount,
+--total product sales, cant do this wiht in-line view
+ROUND((SELECT SUM (prodsummary.pSales) FROM prodSummary), 2)
+;
+#What are the customers ids (cust_id) of customers that have purchased both products with prod_ids of 'BR01' and 'BR03'? 
+SELECT
+ord.cust_id
+FROM
+  `brjo4089.styssql.orders` AS ord
+INNER JOIN
+  `brjo4089.styssql.order_items` AS ordi
+  ON
+ord.order_num = ordi.order_num
+WHERE
+ordi.prod_id ='BR01'
+
+INTERSECT DISTINCT
+
+SELECT
+ord.cust_id
+FROM
+  `brjo4089.styssql.orders` AS ord
+INNER JOIN
+  `brjo4089.styssql.order_items` AS ordi
+  ON
+ord.order_num = ordi.order_num
+WHERE
+ordi.prod_id ='BR03'
+
+ORDER BY
+cust_id ASC
+;
+#What are the total product sales and the employee contribution to the product sales?
+--The employee table is not shown in the ERD because it serves a different purpose in SaleCo's overall data structure. Use the employee table (not emp) for this problem in addition to any other tables that are shown in the ERD
+--Show product code, the product sales as pSales, the employee count as eCount, and the employee contribution as eContrib
+--Employee contribution (eContrib) is the amount of product sales per employee
+--Use an in-line view to answer this question
+--There may be other ways to answer the question but the main objective of this question is for you to practice in-line views 
+--Sort the results by product sales in descending order
+SELECT
+prodsummary.p_code,
+prodsummary.psales,
+prodsummary.eCount,
+ROUND(pSales/eCount, 2) AS eContrib
+
+FROM
+(SELECT
+p_code,
+SUM (LINE_UNITS*LINE_PRICE) AS pSales,
+
+(SELECT
+COUNT(EMP_NUM)
+FROM
+`brjo4089.SaleCo.employee`) AS eCount
+
+FROM `brjo4089.SaleCo.line`
+GROUP BY
+P_CODE
+) AS prodsummary
+
+ORDER BY
+pSales DESC
+
+;
+#Who are the customers (if any) that purchased both the products with product codes (P_CODE) of 13-Q2/P2 and 23109-HB?
+--Show customer codes, customer first names, and customer last names in the result set
+--Show the total product quantities for each of the products aliased as follows:
+--Alias 13-Q2/P2 total quantity as: _13_Q2P2_Qty
+--Alias 23109-HB total quantity as: _23109-HB_Qty
+--Note: check the BigQuery documentation or error codes to know why we started the alias with an underscore
+--Sort the customers by CUS_CODE in ascending order
+--Use in-line views to answer this question
+SELECT
+cust.CUS_CODE,
+cust.cus_lname,
+cust.cus_fname,
+prod1._13_Q2P2_Qty,
+prod2._23109_HB_Qty
+FROM
+`brjo4089.SaleCo.customer` AS cust
+INNER JOIN
+
+(SELECT
+inv.cus_code,
+line.p_code,
+SUM(line.line_units) AS _13_Q2P2_Qty
+FROM
+`brjo4089.SaleCo.invoice` AS inv
+INNER JOIN
+`brjo4089.SaleCo.line` AS line
+ON
+inv.INV_NUMBER = line.INV_NUMBER
+WHERE
+line.p_code = '13-Q2/P2'
+GROUP BY
+inv.cus_code,
+line.P_CODE
+) AS prod1
+
+ON cust.cus_code = prod1.cus_code
+
+INNER JOIN
+(SELECT
+inv.cus_code,
+line.p_code,
+SUM (line.line_units) AS _23109_HB_Qty 
+
+FROM
+`brjo4089.SaleCo.invoice` AS inv
+INNER JOIN
+`brjo4089.SaleCo.line` AS line
+ON
+inv.inv_number = line.INV_NUMBER
+WHERE
+line.p_code = '23109-HB'
+GROUP BY
+inv.cus_code,
+line.p_code) AS prod2
+ON
+prod1.cus_code= prod2.cus_code
+ORDER BY
+cust.cus_code
+;
