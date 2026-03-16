@@ -310,5 +310,18 @@ FROM
 WHERE 
     prod.prod_name LIKE '_ inch%' OR prod.prod_name LIKE '__ inch%' #_ and % is a wildcard (you have to use 'LIKE'), which is a placeholder for potential values that could follow or precede what you are looking for.
 ;
+#: What vendors (vend_id) have an average product price greater than $9 when only considering product prices greater than $4?
+SELECT
+prod.vend_id,
+AVG(prod.prod_price) AS AVGover4
+FROM
+  `brjo4089.styssql.products` AS prod
+WHERE
+  prod.prod_price > 4
+GROUP BY
+  vend_id
+HAVING
+AVGover4 > 9
+;
 
 
