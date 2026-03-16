@@ -289,3 +289,89 @@ prod1.cus_code= prod2.cus_code
 ORDER BY
 cust.cus_code
 ;
+#What are all the products with inventory levels below the average inventory levels?
+
+SELECT prod.p_code, prod.p_descript,
+vend.v_code, vend.v_name, vend.v_contact,
+prod.p_qoh,
+
+(SELECT round(avg(prod.p_qoh),2) from `brjo4089.SaleCo.product` as prod) as avgProdInventory,
+
+round(prod.p_qoh - (SELECT avg(p_qoh) from `brjo4089.SaleCo.product` as prod),2) as invAvgDiff
+
+FROM `brjo4089.SaleCo.product` as prod
+LEFT JOIN
+`brjo4089.SaleCo.vendor` as vend
+ON
+prod.v_code = vend.v_code
+
+GROUP BY
+prod.p_code, prod.p_descript, prod.p_qoh,
+vend.v_code, vend.v_name, vend.v_contact
+
+HAVING
+invAvgDiff < 0
+
+ORDER BY
+invAvgDiff
+;
+#What is the total order quantity for all orders compared to the overall company total quantity and overall company average quantity? 
+
+SELECT
+ordI.order_num, sum(ordI.quantity) as ordTotal,
+
+#subquery one to get total quantity for all orders
+(SELECT
+sum(ordI.quantity)
+FROM
+`styssql.order_items` as ordI
+) as totQty,
+
+#subquery two to get average quantity for all orders
+(SELECT
+round(SUM(ordI.quantity)/(COUNT(DISTINCT order_num)),2)
+FROM
+`styssql.order_items` as ordI
+) as avgQty
+;
+# Q5:What products have inventory (P_QOH) but haven't been sold? 
+SELECT
+  prod.P_CODE,
+  prod.P_QOH,
+  vend.V_NAME
+FROM
+  `brjo4089.SaleCo.vendor` AS vend
+INNER JOIN
+  `brjo4089.SaleCo.product` AS prod
+ON 
+  vend.V_CODE = prod.V_CODE
+
+WHERE
+  vend.V_ORDER IS false
+ORDER BY
+  prod.P_QOH,
+  prod.P_CODE DESC
+
+;
+#Q6:What products have inventory (P_QOH) but haven't been sold? 
+SELECT
+  prod.P_CODE,
+  prod.P_QOH,
+  vend.V_NAME,
+  lin.INV_NUMBER
+FROM
+  `brjo4089.SaleCo.vendor` AS vend
+LEFT JOIN
+  `brjo4089.SaleCo.product` AS prod
+ON 
+  vend.V_CODE = prod.V_CODE
+LEFT JOIN
+  `brjo4089.SaleCo.line` AS lin
+ON
+  prod.P_CODE = lin.p_code
+WHERE
+  INV_NUMBER IS NULL
+ORDER BY
+  prod.P_QOH,
+  prod.P_CODE DESC
+;
