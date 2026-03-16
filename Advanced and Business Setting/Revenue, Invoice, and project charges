@@ -63,3 +63,17 @@ GROUP BY
 ORDER BY
   proj.PROJ_NUM,
   assign.ASSIGN_NUM 
+;
+#What is the product revenue for each order item, subtotal revenue for each product, and the grand total revenue?
+
+SELECT
+*,
+ROUND(quantity*item_price, 2) AS item_revnue,
+ROUND(SUM(quantity *item_price) OVER(PARTITION BY prod_id),2) AS prod_total_revenue,
+ROUND(SUM(quantity *item_price) OVER(), 2) AS total_revnue
+FROM
+  `brjo4089.styssql.order_items`
+ORDER BY
+prod_id,
+order_item
+
