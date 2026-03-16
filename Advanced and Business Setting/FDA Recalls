@@ -1,0 +1,37 @@
+#Q1: What firm has the most recalls of any kind?
+SELECT
+  fda.recalling_firm,
+  COUNT(fda.recall_number) AS recalls
+FROM
+  `bigquery-public-data.fda_drug.drug_enforcement` AS fda
+GROUP BY
+  fda.recalling_firm
+ORDER BY
+  recalls DESC
+;
+#Q2: What firm has had the most dangerous recalls?
+SELECT
+fda.recalling_firm,
+COUNT(fda.classification) AS dangerous
+FROM
+  `bigquery-public-data.fda_drug.drug_enforcement` AS fda
+WHERE
+fda.classification = "I"
+GROUP BY
+fda.recalling_firm
+;
+#Q3: How many Class I recalls have there been reported in the month of January?
+SELECT
+EXTRACT(month FROM fda.report_date) AS month,
+fda.classification,
+COUNT(fda.recall_number) AS recalls
+FROM
+  `bigquery-public-data.fda_drug.drug_enforcement` AS fda
+WHERE
+  EXTRACT(month FROM fda.report_date) = 1
+GROUP BY
+month,
+fda.classification
+ORDER BY
+fda.classification
+;
