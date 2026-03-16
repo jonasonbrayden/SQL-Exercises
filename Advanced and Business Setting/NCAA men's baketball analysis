@@ -38,4 +38,21 @@ SELECT DISTINCT
 FROM
   `bigquery-public-data.ncaa_basketball.mascots` AS m
 ;
+#Q8: How many unique mascots are there that start with the letter M?
+SELECT DISTINCT
+f.mascot
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS f
+WHERE
+  f.mascot LIKE "M%"
+;
+#Q9: What are the first four mascot names that start with the letter 'M' when sorting in reverse ABC order?
+SELECT DISTINCT
+f.mascot
+FROM
+  `bigquery-public-data.ncaa_basketball.mascots` AS f
+WHERE
+  f.mascot LIKE "M%"
+ORDER BY 
+ f.mascot DESC
 
