@@ -1,0 +1,26 @@
+# Q3:What is the average years (EMP_YEARS) of employment for employees whose last names start with 'A'?
+SELECT
+  AVG(EMP_YEARS) AS avgyears,
+  emp.EMP_LNAME,
+  SUM(EMP_YEARS) AS totalyears,
+  
+FROM
+  `brjo4089.ConstrucCO.employee` AS emp
+WHERE
+  emp.EMP_LNAME LIKE "A%"
+  GROUP BY
+  emp.EMP_LNAME
+;
+# Q4:What is the average years (EMP_YEARS) of employment for employees whose last names start with 'Jo'?
+SELECT
+  AVG(EMP_YEARS) AS avgyears,
+  emp.EMP_LNAME,
+  SUM(EMP_YEARS) AS totalyears,
+  
+FROM
+  `brjo4089.ConstrucCO.employee` AS emp
+WHERE
+  emp.EMP_LNAME LIKE "Jo%"
+  GROUP BY
+  emp.EMP_LNAME
+  ;
