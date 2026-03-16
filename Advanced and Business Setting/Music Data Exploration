@@ -199,4 +199,64 @@ SELECT
 FROM
 `brjo4089.mydb.classicrock`
 ;
+# How many users have listened to any song by Chuck Berry?(And Total listens)
+SELECT 
+  COUNT(DISTINCT user_name) AS users,
+  COUNT(listened_at) AS totallistens
 
+FROM
+  `brjo4089.listenbrainz.listen` AS chuck
+WHERE
+chuck.artist_name = 'Chuck Berry'
+;
+# What song by Chuck Berry was the most listened to?
+SELECT
+chuck.track_name,
+COUNT(listened_at) AS totallistens
+FROM
+  `brjo4089.listenbrainz.listen` AS chuck
+WHERE
+chuck.artist_name = 'Chuck Berry'
+GROUP BY
+chuck.track_name
+ORDER BY 
+totallistens DESC
+;
+# What month did the most users listen to any of Whitney Houston's songs?
+SELECT
+EXTRACT(month FROM listened_at ) AS month,
+COUNT(listened_at) AS totallistens,
+COUNT(DISTINCT user_name) AS users,
+FROM
+  `brjo4089.listenbrainz.listen` AS whit
+WHERE
+  whit.artist_name = 'Whitney Houston'
+GROUP BY
+month
+ORDER BY
+users DESC
+;
+#Q4: What was the first rap group? The Sugarhill Gang or Fatback Band?
+  #Show the first listen date of each song which had at least 10 listens and 5 users for each group
+  #Show metrics for each group's popularity on their earliest listen dates
+  #Show total listens, total users, and average listens per user
+SELECT
+f.artist_name,
+f.track_name,
+MIN(listened_at) AS first_date,
+COUNT(DISTINCT user_name) AS users,
+COUNT(listened_at) AS listens,
+ROUND(COUNT(listened_at)/ COUNT(DISTINCT user_name), 2) AS avg_listens_per_user
+
+FROM
+  `brjo4089.listenbrainz.listen` AS f
+WHERE
+f.artist_name = 'Sugarhill Gang' OR f.artist_name= 'Fatback Band'
+GROUP BY 
+f.artist_name,
+f.track_name
+HAVING
+listens >=10 AND users>= 5
+ORDER BY
+first_date,
+listens DESC
