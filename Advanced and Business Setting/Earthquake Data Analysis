@@ -86,3 +86,32 @@ GROUP BY
   dam.eq_primary
 HAVING
   dam.eq_primary > 4
+;
+#Q4: How many hurricanes were there in 1990 whose names started with either A or B?
+SELECT DISTINCT
+  f.season,
+  f.name
+FROM
+  `bigquery-public-data.noaa_hurricanes.hurricanes` AS f
+WHERE
+  (f.name LIKE 'A%' 
+  OR
+  f.name LIKE'B%')
+  AND
+  f.season = '1990'
+  #A: 11
+;
+#Q5: What are the names of the hurricanes that occurred in 1990 whose names started with either A or B?
+SELECT DISTINCT
+  f.season,
+  f.name
+FROM
+  `bigquery-public-data.noaa_hurricanes.hurricanes` AS f
+WHERE
+  (f.name LIKE 'A%' 
+  OR
+  f.name LIKE'B%')
+  AND
+  f.season = '1990'
+  ORDER BY 
+  f.name ASC
